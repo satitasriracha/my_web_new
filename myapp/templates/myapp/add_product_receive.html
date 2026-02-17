@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="add-section">
+    <h2>{% if edit %}แก้ไข{% else %}เพิ่ม{% endif %} การรับสินค้า</h2>
+
+    <form method="post">
+        {% csrf_token %}
+        {% if edit %}
+        <div class="form-group">
+            <label>รหัสการรับสินค้า</label>
+            <input type="text" value="{{ receive.receive_id }}" readonly>
+        </div>
+        <div class="form-group">
+            <label>วันที่รับสินค้า</label>
+            <input type="text" value="{{ receive.receive_date }}" readonly>
+        </div>
+        {% endif %}
+
+        {{ form.as_p }}
+
+        <button type="submit" class="btn btn-success">{% if edit %}อัปเดต{% else %}บันทึก{% endif %}</button>
+        <a href="{% url 'myapp:product_receive_list' %}" class="btn btn-secondary">ยกเลิก</a>
+    </form>
+</div>
+{% endblock %}

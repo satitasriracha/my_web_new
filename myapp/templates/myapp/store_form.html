@@ -1,0 +1,147 @@
+{% extends 'base.html' %} {% block content %}
+  <style>
+    .container {
+      background-color: #fff;
+      padding: 40px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      margin: 40px auto 0;
+      max-width: 700px;
+      font-size: 1.1rem;
+    }
+    
+    h1 {
+      margin-bottom: 25px;
+      color: #2f4f4f;
+      font-weight: bold;
+      font-size: 2rem;
+    }
+    
+    form p {
+      margin-bottom: 16px;
+    }
+    
+    label {
+      font-weight: bold;
+      display: block;
+      margin-bottom: 6px;
+    }
+    
+    input,
+    select,
+    textarea {
+      width: 100%;
+      padding: 8px 12px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      font-size: 1rem;
+      box-sizing: border-box;
+    }
+    
+    .btn {
+      font-size: 1.05rem;
+      padding: 10px 16px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      color: white;
+      margin-right: 10px;
+    }
+    
+    .btn-success {
+      background-color: #90c692;
+    }
+    
+    .btn-success:hover {
+      background-color: #9dd9a0;
+    }
+    
+    .btn-secondary {
+      background-color: #aebfcd;
+    }
+    
+    .btn-secondary:hover {
+      background-color: #92bad9;
+    }
+  </style>
+
+  <div class="container">
+    <h2 class="text-center">
+      {% if form.instance.pk %}
+         📦 ข้อมูลร้านค้า
+      {% else %}
+        ➕ เพิ่มร้านค้า
+      {% endif %}
+    </h2>
+
+    <form id="storeForm" method="post">
+      {% csrf_token %}
+
+      <p>{{ form.name.label_tag }} {{ form.name }}</p>
+
+      <p>{{ form.address.label_tag }} {{ form.address }}</p>
+
+      <p>{{ form.number.label_tag }} {{ form.number }}</p>
+
+      <!-- ✅ หัวข้อบัญชีธนาคาร -->
+      <p>
+        <b>บัญชีธนาคาร:</b>
+      </p>
+      <div style="margin-left: 20px">
+        <p>{{ form.bank_name.label_tag }} {{ form.bank_name }}</p>
+        <p>{{ form.bank_number.label_tag }} {{ form.bank_number }}</p>
+        <p>{{ form.bank_owner.label_tag }} {{ form.bank_owner }}</p>
+      </div>
+
+      <p>{{ form.general_customer.label_tag }} {{ form.general_customer }}</p>
+
+      <button type="submit" class="btn btn-success">💾 บันทึก</button>
+      <button type="button" id="cancelBtn" class="btn btn-secondary" style="display: none" onclick="cancelForm()">❌ ยกเลิก</button>
+    </form>
+  </div>
+
+  <!-- ✅ SweetAlert2 -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  {% if messages %}
+    <script>
+  {% for message in messages %}
+  Swal.fire({
+    icon: "{{ message.tags|default:'info' }}",
+    title: "{{ message|escapejs }}",
+    confirmButtonText: "ตกลง"
+  });
+  {% endfor %}
+</script>
+  {% endif %}
+
+  <script>
+  const form = document.getElementById("storeForm");
+  const cancelBtn = document.getElementById("cancelBtn");
+  let formChanged = false;
+
+  // เมื่อพิมพ์หรือแก้ไข input ใด ๆ ใน form
+  form.querySelectorAll("input, textarea, select").forEach((el) => {
+    el.addEventListener("input", () => {
+      formChanged = true;
+      cancelBtn.style.display = "inline-block"; // ✅ แสดงปุ่ม
+    });
+  });
+
+  function cancelForm() {
+    Swal.fire({
+      title: "ยกเลิกการแก้ไข?",
+      text: "ข้อมูลที่คุณพิมพ์จะถูกลบและกลับเป็นค่าเดิม",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "ใช่, ยกเลิกเลย",
+      cancelButtonText: "ไม่, ทำต่อ",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        form.reset();
+        cancelBtn.style.display = "none"; // ✅ ซ่อนปุ่มกลับ
+        formChanged = false;
+      }
+    });
+  }
+</script>
+{% endblock %}

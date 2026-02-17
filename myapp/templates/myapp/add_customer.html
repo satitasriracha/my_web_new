@@ -1,0 +1,101 @@
+{% extends 'base.html' %} {% block content %}
+<div class="add-section">
+  <h2>➕ เพิ่มลูกค้าใหม่</h2>
+
+  <form method="post" action="{% url 'myapp:add_customer' %}">
+    {% csrf_token %} {{ form.non_field_errors }}
+
+    <!-- รหัสลูกค้า -->
+    <div class="form-group" id="customer-id-group">
+      <label for="{{ form.customer_id.id_for_label }}"
+        >{{ form.customer_id.label }}</label
+      >
+      {{ form.customer_id }} {% if form.customer_id.errors %}
+      <div class="text-danger">{{ form.customer_id.errors }}</div>
+      {% endif %}
+    </div>
+
+    <!-- ชื่อ -->
+    <div class="form-group">
+      <label for="{{ form.name.id_for_label }}">{{ form.name.label }}</label>
+      {{ form.name }} {% if form.name.errors %}
+      <div class="text-danger">{{ form.name.errors }}</div>
+      {% endif %}
+    </div>
+
+    <!-- เบอร์โทร -->
+    <div class="form-group">
+      <label for="{{ form.phone.id_for_label }}">{{ form.phone.label }}</label>
+      {{ form.phone }} {% if form.phone.errors %}
+      <div class="text-danger">{{ form.phone.errors }}</div>
+      {% endif %}
+    </div>
+
+    <!-- ที่อยู่ -->
+    <div class="form-group">
+      <label for="{{ form.address.id_for_label }}"
+        >{{ form.address.label }}</label
+      >
+      {{ form.address }} {% if form.address.errors %}
+      <div class="text-danger">{{ form.address.errors }}</div>
+      {% endif %}
+    </div>
+
+    <!-- สถานะ -->
+    <div class="form-group">
+      <label for="{{ form.status.id_for_label }}"
+        >{{ form.status.label }}</label
+      >
+      {{ form.status }} {% if form.status.errors %}
+      <div class="text-danger">{{ form.status.errors }}</div>
+      {% endif %}
+    </div>
+
+    <!-- รหัสผ่าน -->
+    <div class="form-group">
+      <label for="{{ form.password.id_for_label }}"
+        >{{ form.password.label }}</label
+      >
+      {{ form.password }} {% if form.password.errors %}
+      <div class="text-danger">{{ form.password.errors }}</div>
+      {% endif %}
+    </div>
+
+    <!-- ยืนยันรหัสผ่าน -->
+    <div class="form-group">
+      <label for="{{ form.confirm_password.id_for_label }}"
+        >{{ form.confirm_password.label }}</label
+      >
+      {{ form.confirm_password }} {% if form.confirm_password.errors %}
+      <div class="text-danger">{{ form.confirm_password.errors }}</div>
+      {% endif %}
+    </div>
+
+    <!-- ปุ่ม -->
+    <div class="form-buttons mt-3">
+      <button type="submit" class="btn btn-success">💾 บันทึก</button>
+      <a href="{% url 'myapp:customer_list' %}" class="btn btn-secondary"
+        >ย้อนกลับ</a
+      >
+    </div>
+  </form>
+</div>
+
+<script>
+  const statusSelect = document.getElementById("id_status");
+  const customerIdInput = document.getElementById("id_customer_id");
+
+  function toggleCustomerId() {
+    if (statusSelect.value === "พิเศษ") {
+      // ลูกค้าพิเศษ -> กรอกเองได้
+      customerIdInput.removeAttribute("readonly");
+    } else {
+      // ลูกค้าทั่วไป -> แสดงรหัสอัตโนมัติ แต่แก้ไม่ได้
+      customerIdInput.setAttribute("readonly", true);
+    }
+  }
+
+  toggleCustomerId();
+  statusSelect.addEventListener("change", toggleCustomerId);
+</script>
+{% endblock %}

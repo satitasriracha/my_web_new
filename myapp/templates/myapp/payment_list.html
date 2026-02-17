@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<style>
+    .container {
+        background-color: #fff;
+        padding: 40px;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        margin-top: 40px;
+        font-size: 1.1rem;
+    }
+
+    h2 {
+        margin-bottom: 25px;
+        color: #2f4f4f;
+        font-weight: bold;
+        font-size: 2rem;
+    }
+
+    .table {
+        font-size: 1.05rem;
+        width: 100%;
+    }
+
+    .table th,
+    .table td {
+        text-align: center;
+        padding: 12px;
+    }
+
+    img {
+        max-height: 80px;
+    }
+</style>
+
+<div class="container">
+    <h2>รายการการชำระเงิน</h2>
+    <a href="{% url 'myapp:add_payment' %}" class="btn btn-success mb-3">+ เพิ่มการชำระเงิน</a> <br><br>
+    <table class="table table-bordered">
+        <thead class="table-success">
+            <tr>
+                <th>รหัสการขาย</th>
+                <th>ยอดชำระ</th>
+                <th>ประเภทการชำระ</th>
+                <th>วันที่</th>
+                <th>สลิป</th>
+                <th>จัดการ</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for p in payments %}
+            <tr>
+                <td>{{ p.sale.sale_id }}</td>
+                <td>{{ p.pay_total }}</td>
+                <td>{{ p.get_pay_type_display }}</td>
+                <td>{{ p.date|date:"d/m/Y H:i" }}</td>
+                <td>
+                    {% if p.slip_image %}
+                    <img src="{{ p.slip_image.url }}" alt="Slip">
+                    {% else %}
+                    -
+                    {% endif %}
+                </td>
+                <td>
+                    <a href="{% url 'myapp:edit_payment' p.pk %}" class="btn btn-sm btn-warning">✏️ แก้ไข</a>
+                    <a href="{% url 'myapp:delete_payment' p.pk %}" class="btn btn-sm btn-danger">🗑️ ลบ</a>
+
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6" class="text-center text-muted">ไม่มีข้อมูลการชำระเงิน</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

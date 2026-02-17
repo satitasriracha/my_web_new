@@ -1,0 +1,612 @@
+{% extends 'base.html' %} 
+{% load static %} 
+
+{% block title %}
+ขายหน้าร้าน
+{% endblock %} 
+
+{% block content %}
+<!-- Bootstrap CSS & Icons -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- SweetAlert2 -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<!-- CSS -->
+<style>
+  :root {
+    --brand: #ff944d;        /* ส้มหลัก */
+    --brand-light: #fff0e6;  /* ส้มอ่อน */
+    --border: #ffd9b3;       /* ขอบอ่อน */
+    --text-primary: #5a3e2b; /* น้ำตาลเข้ม */
+    --text-muted: #a1866f;   /* น้ำตาลอ่อน */
+    --danger: #e67a7a;
+    --danger-light: #fdeaea;
+    --bg-light: #fffaf5;     /* พื้นหลังส้มอ่อน */
+    --bg-white: #ffffff;
+    --row-light: #fff4eb;    /* แถวสลับสี */
+  }
+
+  body {
+    font-family: "Arial", sans-serif;
+    background: var(--bg-light);
+    color: var(--text-primary);
+  }
+
+  .page-title {
+    font-size: 24px;
+    font-weight: 800;
+    margin-bottom: 12px;
+    color: var(--brand);
+  }
+
+  .subtext {
+    color: var(--text-muted);
+    font-size: 14px;
+    margin-bottom: 14px;
+  }
+
+  .table-wrap {
+    margin-top: 24px;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+    background: var(--bg-white);
+  }
+
+  /* เอากรอบออกเฉพาะสินค้าและรายการขายสินค้า */
+  .table-wrap.no-frame {
+    border: none !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    padding: 0;
+  }
+
+  table.flat {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  .flat th,
+  .flat td {
+    padding: 10px;
+    border-bottom: 1px solid var(--border);
+    text-align: center;
+  }
+  .flat thead th {
+    background: var(--brand-light);
+    font-weight: bold;
+    color: var(--brand);
+  }
+  .flat tbody tr:nth-child(odd) {
+    background: var(--row-light);
+  }
+
+  /* ปุ่ม */
+  .btn-plus,
+  .btn-clear,
+  .btn-primary {
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .btn-plus {
+    border: 1px solid var(--brand);
+    background: var(--bg-white);
+    color: var(--brand);
+  }
+  .btn-plus:hover {
+    background: var(--brand-light);
+  }
+  .btn-clear {
+    border: 1px solid var(--danger);
+    color: var(--danger);
+    background: var(--bg-white);
+  }
+  .btn-clear:hover {
+    background: var(--danger-light);
+  }
+  .btn-primary {
+    background: var(--brand);
+    color: #fff;
+    border: none;
+  }
+  .btn-primary:hover {
+    background: #ff7b2a;
+  }
+
+  .chip {
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 13px;
+  }
+  .chip.gray {
+    background: #ffe6cc;
+    color: #b85c00;
+  }
+  .chip.green {
+    background: #ffd9b3;
+    color: #8c4d00;
+    border: 1px solid var(--brand);
+  }
+
+  .toolbar-btm {
+    display: flex;
+    justify-content: space-between;
+    padding: 12px;
+    margin-top: 12px;
+    background: var(--brand-light);
+    border-radius: 12px;
+  }
+
+  .history-title {
+    margin-top: 40px;
+    font-size: 20px;
+    font-weight: bold;
+    color: var(--brand);
+  }
+
+  .product-card {
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 16px;
+    text-align: center;
+    box-shadow: 0 4px 10px rgba(255, 148, 77, 0.2);
+    background: var(--bg-white);
+  }
+  .product-card img {
+    width: 100%;
+    height: 120px;
+    object-fit: cover;
+  }
+  .product-card h6 {
+    margin: 8px 0;
+    font-size: 18px;
+    font-weight: bold;
+    color: var(--brand);
+  }
+
+  .variant-btn {
+    display: block;
+    width: 100%;
+    margin: 4px 0;
+    padding: 6px 8px;
+    border-radius: 8px;
+    border: 1px solid var(--brand);
+    background: var(--brand-light);
+    color: #b85c00;
+    font-size: 17px;
+    cursor: pointer;
+  }
+  .variant-btn:hover {
+    background: #ffe0cc;
+  }
+  .product-code {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text-muted);
+    margin-bottom: 4px;
+  }
+  .remove-icon {
+    font-size: 20px;
+    color: var(--danger);
+    cursor: pointer;
+    transition: transform 0.2s, color 0.2s;
+  }
+  .remove-icon:hover {
+    color: #ff0000;
+    transform: scale(1.2);
+  }
+  .modal-orange {
+  background-color: #ff944dac;   /* ส้มหลัก */
+  color: #fff;                /* ตัวอักษรขาว */
+  }
+  /* ========================= */
+/* ธีมสีน้ำตาลสำหรับโซนประวัติการขาย */
+  .table-wrap.history {
+    border: 1px solid #d2b48c;   /* ขอบน้ำตาลอ่อน */
+    background: #fffaf0;         /* ครีมน้ำตาล */
+  }
+
+  .table-wrap.history th {
+    background: #f5deb3;         /* น้ำตาลอ่อน */
+    color: #5a3e2b;              /* น้ำตาลเข้ม */
+    font-weight: bold;
+  }
+
+  .table-wrap.history tbody tr:nth-child(odd) {
+    background: #fdf5e6;         /* ครีมอ่อน */
+  }
+
+  .history-title {
+    color: #8B4513;              /* น้ำตาลเข้ม */
+  }
+
+
+</style>
+
+
+<h2 class="page-title">ขายหน้าร้าน</h2>
+<div class="subtext">
+  เลือกสินค้าที่ต้องการแล้วกด <strong>+</strong> เพื่อเพิ่มเข้าตะกร้า
+</div>
+
+<!-- ฟอร์ม -->
+<form method="POST" action="{% url 'myapp:add_sale' %}" id="sale-form">
+  {% csrf_token %}
+
+  <div class="row mb-3">
+    <div class="col-md-4">
+      <label>รหัสการขาย</label>
+      <input class="form-control" type="text" name="sale_code" value="{{ preview_code }}" readonly/>
+    </div>
+    <div class="col-md-4">
+      <label>วันที่ขาย</label>
+      <input class="form-control" type="date" id="sale_date" name="sale_date" required/>
+    </div>
+    <div class="col-md-4">
+      <label>พนักงาน</label>
+      <input class="form-control" type="text" value="{{ user.username }}" readonly/>
+    </div>
+  </div>
+
+  <div class="row mb-3">
+    <div class="col-md-4">
+      <label>รหัสลูกค้า</label>
+      <div class="input-group">
+        <input class="form-control" type="text" name="customer_id" id="customer_id" placeholder="ป้อนรหัสลูกค้า" required/>
+        <button class="btn btn-outline-secondary" type="button" id="btn-cust-info">...</button>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <label>ชื่อลูกค้า</label>
+      <input class="form-control" type="text" id="customer_name" readonly/>
+    </div>
+    <div class="col-md-6">
+      <input type="hidden" name="status" value="4"/>
+    </div>
+  </div>
+
+  <!-- ตารางสินค้า -->
+  <div class="table-wrap no-frame">
+    <h3>สินค้า</h3>
+    <div class="row">
+      {% for product in products %}
+      <div class="col-md-3">
+        <div class="product-card">
+          <img src="{{ product.image.url|default:'/static/no-image.png' }}" alt="{{ product.product_name }}"/>
+          <div class="p-2">
+            <div class="product-code">รหัส: {{ product.product_id }}</div>
+            <h6>{{ product.product_name }}</h6>
+            <button type="button" class="variant-btn"
+              onclick="addToCart('{{ product.product_id }}','{{ product.product_name }}','{{ product.price }}','{{ product.weight }}')">
+              {{ product.weight|floatformat:"g" }} กก. - {{ product.price|floatformat:"g" }} ฿
+            </button>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- ตะกร้า -->
+  <div class="table-wrap no-frame mt-3">
+    <h3>รายการขายสินค้า</h3>
+    <table class="flat" id="cart-table">
+      <thead>
+        <tr>
+          <th>รหัสสินค้า</th>
+          <th>ชื่อสินค้า</th>
+          <th>น้ำหนัก (กก.)</th>
+          <th>ราคา (บาท)</th>
+          <th>จำนวน (ถุง)</th>
+          <th>รวมเป็นเงิน (บาท)</th>
+          <th>&nbsp;</th>
+        </tr>
+      </thead>
+      <tbody id="cart-body">
+        <tr>
+          <td colspan="7" class="text-center text-muted">ยังไม่มีสินค้าในตะกร้า</td>
+        </tr>
+      </tbody>
+      <tfoot>
+        <tr>
+          <td colspan="4" class="text-end"><strong>รวมเป็นเงิน</strong></td>
+          <td id="cart-subtotal">0</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td colspan="4" class="text-end"><strong>รวมค่าขนส่ง</strong></td>
+          <td id="cart-shipping">0</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td colspan="4" class="text-end"><strong>รวมทั้งสิ้น</strong></td>
+          <td id="cart-grandtotal"><strong>0</strong></td>
+          <td></td>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+
+  <div class="toolbar-btm">
+    <div></div>
+    <button type="submit" class="btn btn-primary">✅ ยืนยันการขาย</button>
+  </div>
+
+  <!-- Hidden fields -->
+  <input type="hidden" name="items_json" id="items_json"/>
+  <input type="hidden" id="shipping_cost" name="shipping_cost"/>
+  <input type="hidden" id="cart-total"/>
+  <input type="hidden" id="cart-count"/>
+  <input type="hidden" id="cart-total-qty"/>
+</form>
+
+
+<!-- Modal ลูกค้า -->
+<div class="modal fade" id="customerModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title">รายการลูกค้าทั้งหมด</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <p>รหัสลูกค้า: <span id="modal-cust-id"></span></p>
+        <p>ชื่อลูกค้า: <span id="modal-cust-name"></span></p>
+        <table class="table table-bordered table-striped">
+          <thead>
+            <tr>
+              <th>รหัสลูกค้า</th>
+              <th>ชื่อลูกค้า</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for cust in customers %}
+            <tr>
+              <td>{{ cust.customer_id }}</td>
+              <td>{{ cust.name }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-bs-dismiss="modal">ปิด</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ประวัติการขาย -->
+<h3 class="history-title">รายการประวัติการขาย</h3>
+<form method="get" class="row g-3 mb-3">
+  <div class="col-md-4">
+    <label>วันที่</label>
+    <input type="date" name="filter_date" class="form-control" value="{{ request.GET.filter_date }}"/>
+  </div>
+  <div class="col-md-4 d-flex align-items-end">
+    <button type="submit" class="btn btn-primary w-100">ค้นหา</button>
+  </div>
+</form>
+
+<div class="table-wrap history">
+  <table class="flat">
+    <thead>
+      <tr>
+        <th>รหัสการขาย</th>
+        <th>วันที่</th>
+        <th>ลูกค้า</th>
+        <th>สถานะ</th>
+        <th>รายละเอียด</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for sale in sales %}
+      <tr>
+        <td>{{ sale.sale_code }}</td>
+        <td>{{ sale.sale_date|date:"Y-m-d" }}</td>
+        <td>{{ sale.customer.name }}</td>
+        <td>{{ sale.get_status_display }}</td>
+        <td>
+          <button class="btn btn-outline-success btn-sm" data-bs-toggle="modal" data-bs-target="#modal-{{ sale.id }}">
+            <i class="bi bi-search"></i>
+          </button>
+
+          <!-- Modal รายละเอียด -->
+          <div class="modal fade" id="modal-{{ sale.id }}" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-lg modal-dialog-centered">
+              <div class="modal-content">
+                <div class="modal-header modal-orange text-white">
+                  <h5 class="modal-title">รายละเอียดการขาย {{ sale.sale_code }}</h5>
+                  <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                  <table class="table table-bordered table-hover align-middle">
+                    <thead class="table-light">
+                      <tr>
+                        <th style="width:20%">รหัสสินค้า</th>
+                        <th style="width:40%">ชื่อสินค้า (กิโลกรัม)</th>
+                        <th>ราคา (บาท)</th>
+                        <th>จำนวน (ถุง)</th>
+                        <th>รวมเป็นเงิน</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {% for it in sale.items.all %}
+                      <tr>
+                        <td>{{ it.product.product_id }}</td>
+                        <td>{{ it.product.product_name }} ({{ it.product.weight|floatformat:"g" }} กก.)</td>
+                        <td>{{ it.price|floatformat:"g" }}</td>
+                        <td>{{ it.quantity|floatformat:"g" }}</td>
+                        <td>{{ it.get_total|floatformat:"g" }}</td>
+                      </tr>
+                      {% endfor %}
+                      <tr>
+                        <td colspan="4" class="text-end"><strong>รวมเป็นเงิน</strong></td>
+                        <td>{{ sale.items_total|floatformat:"g" }}</td>
+                      </tr>
+                      <tr>
+                        <td colspan="4" class="text-end"><strong>รวมค่าขนส่ง</strong></td>
+                        <td>{{ sale.shipping_fee|floatformat:"g" }}</td>
+                      </tr>
+                      <tr>
+                        <td colspan="4" class="text-end"><strong>รวมทั้งสิ้น</strong></td>
+                        <td><strong>{{ sale.get_total|floatformat:"g" }}</strong></td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+                <div class="modal-footer">
+                  <button class="btn btn-secondary" data-bs-dismiss="modal">ปิด</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </td>
+      </tr>
+      {% empty %}
+      <tr>
+        <td colspan="5" class="text-center text-muted">ยังไม่มีข้อมูลการขาย</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+
+<script>
+  let cart = [];
+  let shippingRates = {{ shipping_rates|safe }};
+
+  function addToCart(productId, productName, price, weight=1) {
+      const existing = cart.find(item => item.product_id === productId);
+      if (existing) {
+          existing.qty += 1;
+      } else {
+          cart.push({ product_id: productId, name: productName, price: parseFloat(price), weight: parseFloat(weight), qty: 1 });
+      }
+      updateCartDisplay();
+  }
+
+  function calculateShipping(totalWeight) {
+      let found = shippingRates.find(r => totalWeight <= r.weight);
+      if (found) return parseFloat(found.rate);
+      if (shippingRates.length > 0) return parseFloat(shippingRates[shippingRates.length - 1].rate);
+      return 0;
+  }
+
+  function updateCartDisplay() {
+    const cartBody = document.getElementById('cart-body');
+    cartBody.innerHTML = '';
+    let total = 0, totalWeight = 0;
+
+    if (cart.length === 0) {
+        cartBody.innerHTML = `<tr><td colspan="6" class="text-center text-muted">ยังไม่มีสินค้าในตะกร้า</td></tr>`;
+    } else {
+        cart.forEach((item, index) => {
+            let subtotal = item.price * item.qty;
+            total += subtotal;
+            totalWeight += item.weight * item.qty;
+            cartBody.innerHTML += `
+                <tr>
+                    <td>${item.product_id}</td>
+                    <td>${item.name}</td>
+                    <td>${item.weight}</td>
+                    <td>${item.price}</td>
+                    <td><input type="number" min="1" value="${item.qty}" onchange="updateQty(${index}, this.value)" style="width:60px;text-align:center;"></td>
+                    <td>${subtotal}</td>
+                    <td><i class="bi bi-x-circle-fill remove-icon" onclick="confirmRemove(${index})"></i></td>
+                </tr>`;
+        });
+    }
+
+    let shipping = calculateShipping(totalWeight);
+    let grandTotal = total + shipping;
+
+    // อัปเดต footer
+    document.getElementById('cart-subtotal').textContent = total.toLocaleString();
+    document.getElementById('cart-shipping').textContent = shipping.toLocaleString();
+    document.getElementById('cart-grandtotal').textContent = grandTotal.toLocaleString();
+
+    // เก็บค่าลงฟอร์ม
+    document.getElementById('shipping_cost').value = shipping;
+    document.getElementById('cart-total').value = grandTotal;
+    document.getElementById('cart-count').value = cart.length;
+    document.getElementById('cart-total-qty').value = cart.reduce((sum, item) => sum + item.qty, 0);
+    document.getElementById('items_json').value = JSON.stringify(cart);
+  }
+
+  function updateQty(index, value) {
+      cart[index].qty = parseInt(value);
+      if (cart[index].qty < 1) cart[index].qty = 1;
+      updateCartDisplay();
+  }
+
+  function confirmRemove(index) {
+      Swal.fire({
+          title: 'คุณจะลบสินค้านี้ใช่หรือไม่?',
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonText: 'ใช่, ลบเลย',
+          cancelButtonText: 'ยกเลิก'
+      }).then((result) => {
+          if (result.isConfirmed) {
+              cart.splice(index, 1);
+              updateCartDisplay();
+              Swal.fire('ลบสินค้าแล้ว', '', 'success');
+          }
+      });
+  }
+
+  document.getElementById('sale-form').addEventListener('submit', function(e) {
+      e.preventDefault();
+      Swal.fire({
+          title: 'คุณต้องการขายสินค้าใช่หรือไม่?',
+          icon: 'question',
+          showCancelButton: true,
+          confirmButtonText: 'ใช่, ยืนยันการขาย',
+          cancelButtonText: 'ยกเลิก'
+      }).then((result) => {
+          if (result.isConfirmed) {
+              Swal.fire('บันทึกการขายสำเร็จ', 'ข้อมูลการขายถูกบันทึกเรียบร้อย', 'success')
+              .then(() => { e.target.submit(); });
+          }
+      });
+  });
+
+  window.onload = function () {
+      document.getElementById("customer_id").value = "000";
+      let match = customers.find(c => c.id === "000");
+      document.getElementById("customer_name").value = match ? match.name : "";
+  };
+
+  let customers = [
+  {% for cust in customers %}
+  {"id": "{{ cust.customer_id }}", "name": "{{ cust.name }}"},
+  {% endfor %}
+  ];
+
+  document.getElementById("customer_id").addEventListener("input", function() {
+      let code = this.value.trim();
+      let match = customers.find(c => c.id === code);
+      document.getElementById("customer_name").value = match ? match.name : "";
+  });
+
+  document.getElementById("btn-cust-info").addEventListener("click", function() {
+      let code = document.getElementById("customer_id").value.trim();
+      let match = customers.find(c => c.id === code);
+
+      document.getElementById("modal-cust-id").textContent = match ? match.id : (code || "-");
+      document.getElementById("modal-cust-name").textContent = match ? match.name : "ไม่พบลูกค้า";
+
+      let modal = new bootstrap.Modal(document.getElementById("customerModal"));
+      modal.show();
+  });
+</script>
+{% endblock %}

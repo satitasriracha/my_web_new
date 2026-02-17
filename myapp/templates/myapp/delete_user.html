@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container">
+    <h1>ยืนยันการลบผู้ใช้</h1>
+
+    <p>คุณต้องการลบผู้ใช้: <strong>{{ user.name }}</strong> (รหัส: {{ user.user_id }}) หรือไม่?</p>
+
+    <form method="post" action="{% url 'myapp:delete_user' user.user_id %}">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">ลบผู้ใช้นี้</button>
+        <a href="{% url 'myapp:user_list' %}" class="btn btn-secondary">ยกเลิก</a>
+    </form>
+</div>
+{% endblock %}

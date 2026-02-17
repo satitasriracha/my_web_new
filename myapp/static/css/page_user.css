@@ -1,0 +1,177 @@
+/* page_user.css */
+
+/* กล่องหลักของหน้า User */
+.user-section {
+    background: #fff;
+    border-radius: 12px;
+    padding: 25px 30px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+    margin-top: 30px;
+}
+
+/* Title */
+.user-section h2 {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: #2f4f4f;
+    margin-bottom: 20px;
+    border-left: 5px solid #1f8f3a;
+    padding-left: 12px;
+}
+
+/* ปุ่มเพิ่มผู้ใช้ */
+.add-user-btn {
+    background: #1f8f3a;
+    color: #fff;
+    border-radius: 8px;
+    padding: 8px 16px;
+    font-size: 1rem;
+    font-weight: bold;
+    margin-bottom: 15px;
+    display: inline-block;
+    transition: background 0.2s ease;
+}
+
+.add-user-btn:hover {
+    background: #15762d;
+}
+
+/* ตารางผู้ใช้ */
+.user-table th {
+    background: #eaf5ea;
+    font-weight: bold;
+}
+
+.user-table td {
+    text-align: center;
+}
+
+/* ปุ่มแก้ไข + ลบ */
+.user-table .btn-warning,
+.user-table .btn-danger {
+    padding: 6px 12px;
+    font-size: 0.95rem;
+}
+
+/* ฟอร์มกรอง */
+.filter-form {
+    margin-bottom: 20px;
+}
+
+.filter-label {
+    font-size: 16px;
+    margin-right: 10px;
+}
+
+.filter-select {
+    width: 300px;
+    display: inline-block;
+    margin-left: 20px;
+    font-size: 16px;
+    height: 45px;
+    padding: 8px 10px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+}
+
+/* ปุ่มเพิ่มผู้ใช้ */
+.add-user-btn {
+    background: #1f8f3a;
+    color: #fff;
+    border-radius: 8px;
+    padding: 8px 16px;
+    font-size: 1rem;
+    font-weight: bold;
+    text-decoration: none;
+    display: inline-block;
+    transition: background 0.2s ease;
+}
+
+.add-user-btn:hover {
+    background: #15762d;
+}
+
+/* จัดการรูปสินค้า */
+.product-img {
+    width: 100px;
+    /* กำหนดขนาดรูป */
+    height: 100px;
+    object-fit: cover;
+    /* ครอบรูปให้พอดีกล่อง */
+    border-radius: 6px;
+    border: 1px solid #ddd;
+    display: block;
+    margin: 0 auto;
+    /* จัดให้อยู่ตรงกลาง */
+}
+
+/* จัดการปุ่มจัดการสินค้า */
+.btn-group {
+    display: flex;
+    justify-content: center;
+    /* จัดปุ่มให้อยู่ตรงกลาง */
+    gap: 8px;
+    /* ระยะห่างระหว่างปุ่ม */
+    flex-wrap: nowrap;
+    /* ไม่ให้ปุ่มตกบรรทัด */
+}
+
+.btn-group .btn {
+    min-width: 70px;
+    /* กำหนดความกว้างขั้นต่ำให้ปุ่ม */
+    text-align: center;
+    font-size: 0.9rem;
+    padding: 6px 10px;
+    border-radius: 6px;
+}
+
+/* ให้ container ใช้สไตล์เดียวกับ user-section */
+.container,
+.user-section {
+    background: #fff;
+    border-radius: 12px;
+    padding: 25px 30px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+    margin-top: 30px;
+}
+
+/* ให้ table ใช้สไตล์เดียวกับ user-table */
+.table,
+.user-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 25px;
+}
+
+.table th,
+.user-table th,
+.table td,
+.user-table td {
+    padding: 12px 15px;
+    border: 1px solid #ddd;
+    text-align: center;
+    vertical-align: middle;
+}
+
+.table th,
+.user-table th {
+    background-color: #eaf5ea;
+    font-weight: bold;
+}
+
+/* ปุ่มเพิ่ม */
+.btn-success,
+.add-user-btn {
+    background: #1f8f3a;
+    color: #fff;
+    border-radius: 8px;
+    padding: 8px 16px;
+    font-size: 1rem;
+    font-weight: bold;
+    display: inline-block;
+    transition: background 0.2s ease;
+}
+
+.btn-success:hover {
+    background: #15762d;
+}

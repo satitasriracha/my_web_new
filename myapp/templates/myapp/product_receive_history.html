@@ -1,0 +1,97 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}ประวัติการรับสินค้า{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/product_receive.css' %}">
+
+<div class="sheet">
+    <h2 class="page-title">รายการรับสินค้า</h2>
+    <div class="subtext">บันทึกย้อนหลังของการรับสินค้าทั้งหมด</div>
+
+    <div style="margin: 16px 0; display: flex; gap: 10px;">
+        <a href="{% url 'myapp:product_receive_list' %}" class="btn btn-primary">รับสินค้า</a>
+        <a href="{% url 'myapp:product_receive_history' %}" class="btn btn-secondary">รายการรับสินค้า</a>
+    </div>
+
+    <div class="table-wrap">
+        <table class="flat" id="history-table">
+            <thead>
+                <tr>
+                    <th class="center" style="width:150px;">รหัสการรับ</th>
+                    <th class="center" style="width:140px;">วันที่รับ</th>
+                    <th class="center">ผู้รับ</th>
+                    <th class="center" style="width:120px;">จำนวน</th>
+                    <th class="center" style="width:100px;">รายละเอียด</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for receive in product_receives %}
+                <tr>
+                    <td class="center">{{ receive.receive_id }}</td>
+                    <td class="center">{{ receive.receive_date|date:"d/m/Y" }}</td>
+                    <td class="center">{{ receive.user.get_full_name|default:receive.user.username }}</td>
+                    <td class="center"><span class="badge">{{ receive.getTotalItems }}</span></td>
+                    <td class="center">
+                        <!-- ปุ่มแว่นขยาย -->
+                        <button type="button" class="btn btn-sm btn-info" data-bs-toggle="modal"
+                            data-bs-target="#modal-{{ receive.pk }}">
+                            🔍
+                        </button>
+
+                        <!-- Popup Modal -->
+                        <div class="modal fade" id="modal-{{ receive.pk }}" tabindex="-1">
+                            <div class="modal-dialog modal-lg modal-dialog-centered">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title">รายละเอียดการรับ {{ receive.receive_id }}</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <table class="flat">
+                                            <thead>
+                                                <tr>
+                                                    <th class="center">รหัสสินค้า</th>
+                                                    <th>ชื่อสินค้า</th>
+                                                    <th class="center">น้ำหนัก</th>
+                                                    <th class="center">จำนวน</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for it in receive.items.all %}
+                                                <tr>
+                                                    <td class="center">{{ it.product.product_id }}</td>
+                                                    <td>{{ it.product.product_name }}</td>
+                                                    <td class="center">{{ it.product.get_weight_display }}</td>
+                                                    <td class="center">{{ it.quantity }}</td>
+                                                </tr>
+                                                {% empty %}
+                                                <tr>
+                                                    <td colspan="4" class="center muted">ไม่มีข้อมูลสินค้า</td>
+                                                </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary"
+                                            data-bs-dismiss="modal">ปิด</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" class="center muted">ไม่มีข้อมูลการรับสินค้า</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Bootstrap JS (ถ้ายังไม่ได้ใส่ใน base.html) -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+{% endblock %}

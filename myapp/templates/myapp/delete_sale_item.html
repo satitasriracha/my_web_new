@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container" style="max-width: 500px; margin-top: 40px;">
+    <h2>ยืนยันการลบรายการขายสินค้า</h2>
+    <p>คุณต้องการลบรายการขายสินค้า <strong>{{ sale_item.product.product_name }}</strong> ของการขาย <strong>{{
+            sale_item.sale.sale_id }}</strong> ใช่หรือไม่?</p>
+
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">ลบ</button>
+        <a href="{% url 'myapp:sale_item_list' %}" class="btn btn-secondary">ยกเลิก</a>
+    </form>
+</div>
+{% endblock %}

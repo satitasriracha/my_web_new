@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="add-section">
+    <h2>เพิ่มสินค้า</h2>
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn btn-success">💾 บันทึก</button>
+        <a href="{% url 'myapp:product_list' %}" class="btn btn-secondary">ยกเลิก</a>
+    </form>
+</div>
+
+<!-- ✅ SweetAlert2 -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+{% if messages %}
+<script>
+    {% for message in messages %}
+        Swal.fire({
+            icon: '{% if "success" in message.tags %}success{% elif "error" in message.tags %}error{% else %}info{% endif %}',
+            title: '{{ message|escapejs }}',
+            showConfirmButton: false,
+            timer: 2500
+        });
+    {% endfor %}
+</script>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="add-section">
+    <h2>{% if edit %}แก้ไข{% else %}เพิ่ม{% endif %} การชำระเงิน</h2>
+
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn btn-success">{% if edit %}อัปเดต{% else %}บันทึก{% endif %}</button>
+        <a href="{% url 'myapp:payment_list' %}" class="btn btn-secondary">ยกเลิก</a>
+    </form>
+</div>
+{% endblock %}

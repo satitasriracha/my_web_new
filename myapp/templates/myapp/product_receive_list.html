@@ -1,0 +1,538 @@
+{% extends 'base.html' %}
+{% block title %}การรับสินค้า{% endblock %}
+{% block content %}
+
+<!-- Bootstrap CSS & Icons -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<style>
+  :root {
+    --brand: #4aa96c;
+    --brand-light: #e8f6ef;
+    --border: #e0e0e0;
+    --text-primary: #2f4f4f;
+    --text-muted: #7d8b8b;
+    --danger: #d9534f;
+    --bg-light: #fdfdfd;
+    --bg-white: #ffffff;
+  }
+
+  body {
+    font-family: "Arial", sans-serif;
+    background: var(--bg-light);
+    color: var(--text-primary);
+  }
+
+  .page-title {
+    font-size: 26px;
+    font-weight: 800;
+    margin-bottom: 12px;
+    color: var(--brand);
+  }
+
+  .subtext {
+    color: var(--text-muted);
+    font-size: 15px;
+  }
+
+  /* ===== Product Card ===== */
+  .product-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 20px;
+    margin-top: 10px;
+  }
+
+  .product-card {
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+    background: var(--bg-white);
+    box-shadow: 0 4px 10px rgba(74, 169, 108, 0.08);
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+  }
+
+  .product-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 14px rgba(74, 169, 108, 0.15);
+  }
+
+  .product-card img {
+    width: 100%;
+    height: 150px;
+    object-fit: cover;
+    border-bottom: 1px solid #eee;
+  }
+
+  .no-image {
+    width: 100%;
+    height: 150px;
+    background: #f0f0f0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #888;
+  }
+
+  .btn-weight {
+    background: var(--brand-light);
+    color: var(--brand);
+    font-weight: 600;
+    border-radius: 20px;
+    padding: 6px 14px;
+    font-size: 13px;
+    border: 1px solid var(--brand);
+    transition: all 0.2s;
+  }
+
+  .btn-weight:hover {
+    background: var(--brand);
+    color: #fff;
+  }
+
+  .btn-weight.active {
+    background: #388e3c;
+    color: #fff;
+  }
+
+  /* ===== Cart ===== */
+  .cart-container { margin-top: 30px; }
+
+  #cart-table {
+    border-collapse: separate;
+    border-spacing: 0 8px;
+    width: 100%;
+  }
+
+  #cart-table thead th {
+    background: var(--brand-light);
+    color: var(--text-primary);
+    font-weight: 600;
+    text-align: center;
+    padding: 12px;
+    border: none;
+  }
+
+  #cart-table tbody tr {
+    background: #fff;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+    border-radius: 12px;
+  }
+
+  #cart-table tbody td {
+    border: none;
+    padding: 12px;
+    text-align: center;
+    vertical-align: middle;
+  }
+
+  .qty-input {
+    width: 50px !important;
+    height: 28px !important;
+    text-align: center !important;
+    border: 1px solid var(--border) !important;
+    border-radius: 6px !important;
+    font-size: 13px !important;
+    margin: auto !important;
+    display: block;
+  }
+
+  .qty-input:focus {
+    border-color: var(--brand) !important;
+    box-shadow: 0 0 3px rgba(74, 169, 108, 0.4) !important;
+    outline: none !important;
+  }
+
+  .remove-icon {
+    font-size: 20px;
+    color: var(--danger);
+    cursor: pointer;
+    transition: transform 0.2s, color 0.2s;
+  }
+
+  .remove-icon:hover {
+    color: #ff0000;
+    transform: scale(1.2);
+  }
+
+  .toolbar-btm {
+    display: flex;
+    justify-content: space-between;
+    padding: 12px;
+    margin-top: 12px;
+    background: var(--bg-light);
+    border-radius: 12px;
+  }
+
+  .chip {
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 13px;
+  }
+
+  .chip.gray { background: #f0f0f0; }
+  .chip.green { background: #e9f6ec; color: #0c6d27; border: 1px solid var(--brand); }
+
+  /* ===== History ===== */
+  .history-title {
+    margin-top: 40px;
+    font-size: 20px;
+    font-weight: bold;
+    color: var(--text-primary);
+  }
+
+  .table-custom {
+    border-collapse: separate;
+    border-spacing: 0 8px;
+    width: 100%;
+  }
+
+  .table-custom thead th {
+    background: #f7f7f7;
+    color: #444;
+    font-weight: 600;
+    border: none;
+    text-align: center;
+  }
+
+  .table-custom tbody tr {
+    background: #fff;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+    border-radius: 12px;
+  }
+
+  .table-custom tbody td {
+    padding: 12px;
+    text-align: center;
+    border: none;
+  }
+
+  .img-thumb img {
+    width: 50px;
+    height: 50px;
+    object-fit: cover;
+    border-radius: 6px;
+    transition: transform 0.3s ease;
+    cursor: zoom-in;
+  }
+
+  .img-thumb img:hover {
+    transform: scale(3);
+    z-index: 1000;
+    position: relative;
+  }
+  /* ปุ่มค้นหา (เขียวอ่อน) */
+.btn-search {
+  background-color: var(--brand-light) !important;  /* เขียวอ่อน */
+  color: var(--brand) !important;                  /* ตัวหนังสือเขียวเข้ม */
+  font-weight: 600;
+  border: 1px solid var(--brand);
+  transition: all 0.2s;
+}
+
+.btn-search:hover {
+  background-color: var(--brand) !important;       /* เขียวเข้มตอน hover */
+  color: #fff !important;
+}
+
+</style>
+
+<div>
+  <!-- Header -->
+  <h2 class="page-title">การรับสินค้า</h2>
+  <div class="subtext">
+    เลือกสินค้าที่ต้องการแล้วกด <strong>ปุ่มน้ำหนัก</strong> เพื่อใส่ตะกร้า
+  </div>
+
+  <!-- ฟอร์มรับสินค้า -->
+  <form method="POST" action="{% url 'myapp:product_receive_preview' %}" id="receive-form">
+    {% csrf_token %}
+    <div class="row mb-3">
+      <div class="col-md-6">
+        <label class="form-label">รหัสการรับสินค้า</label>
+        <input class="form-control" type="text" name="receive_id" value="{{ auto_id }}" readonly/>
+      </div>
+      <div class="col-md-6">
+        <label class="form-label">วันที่รับสินค้า</label>
+        <input class="form-control" type="date" id="receive_date" name="receive_date" required />
+      </div>
+    </div>
+
+    <!-- สินค้า -->
+    <h3>สินค้า</h3>
+    <div class="row g-3">
+      {% for product in products %}
+      <div class="col-md-3 col-sm-6">
+        <div class="product-card">
+          {% if product.image %}
+            <img src="{{ product.image.url }}" alt="{{ product.product_name }}" />
+          {% else %}
+            <div class="no-image">ไม่มีรูป</div>
+          {% endif %}
+          <div class="p-2 text-center">
+            <h6 class="fw-bold">{{ product.product_name }}</h6>
+            <p class="text-muted small">รหัส: {{ product.product_id }}</p>
+            <div class="d-flex justify-content-center align-items-center gap-2">
+              <button type="button" class="btn btn-weight"
+                onclick="selectWeight(this, '{{ product.product_id }}','{{ product.product_name }}','{{ product.get_weight_display }}')">
+                {{ product.get_weight_display }}
+              </button>
+              <button type="button" class="btn btn-outline-success btn-sm rounded-circle"
+                onclick="addToCart('{{ product.product_id }}','{{ product.product_name }}','{{ product.get_weight_display }}')">
+                <i class="bi bi-plus"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+
+    <!-- ตะกร้า -->
+    <div class="cart-container">
+      <h3 class="mt-4">รายการสินค้า</h3>
+      <div class="table-responsive">
+        <table class="table table-bordered align-middle" id="cart-table">
+          <thead class="table-light">
+            <tr>
+              <th>รหัสสินค้า</th>
+              <th>ชื่อสินค้า</th>
+              <th>น้ำหนัก</th>
+              <th>จำนวน</th>
+              <th>&nbsp;</th>
+            </tr>
+          </thead>
+          <tbody id="cart-body">
+            <tr>
+              <td colspan="5" class="text-center text-muted">ยังไม่มีสินค้าในตะกร้า</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="toolbar-btm">
+        <div>
+          <span id="cart-count-text" class="chip gray">จำนวนรายการ: 0 รายการ</span>
+          <span id="cart-total-qty-text" class="chip green">รวมทั้งหมด: 0 ถุง</span>
+        </div>
+        <button type="submit" class="btn btn-primary">ยืนยันการรับสินค้า</button>
+      </div>
+      <input type="hidden" name="items_json" id="items_json" />
+    </div>
+  </form>
+
+  <!-- ประวัติการรับ -->
+  <h3 class="history-title" id="history-section">ประวัติการรับสินค้า</h3>
+  <form method="GET" action="#history-section" class="row g-2 mb-3">
+    <div class="col-md-3">
+      <label class="form-label">ค้นหาตามวันที่</label>
+      <input type="date" class="form-control" name="filter_date" value="{{ filter_date }}">
+    </div>
+    <div class="col-md-3 d-flex align-items-end">
+      <button type="submit" class="btn btn-search w-100">ค้นหา</button>
+    </div>
+  </form>
+
+  <table class="table-custom">
+    <thead>
+      <tr>
+        <th>รหัสการรับ</th>
+        <th>วันที่</th>
+        <th>ผู้รับ</th>
+        <th>จำนวนสินค้า</th>
+        <th>รายละเอียด</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% if filter_date %}
+        {% for receive in product_receives %}
+        <tr>
+          <td>{{ receive.receive_id }}</td>
+          <td>{{ receive.receive_date|date:"Y-m-d" }}</td>
+          <td>{{ receive.user.username }}</td>
+          <td>{{ receive.items.count }}</td>
+          <td>
+            <button class="btn btn-outline-success btn-sm" data-bs-toggle="modal" data-bs-target="#modal-{{ receive.receive_id }}">
+              <i class="bi bi-search"></i>
+            </button>
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="5" class="text-center text-muted">ไม่พบข้อมูลในวันที่เลือก</td>
+        </tr>
+        {% endfor %}
+      {% else %}
+        <tr>
+          <td colspan="5" class="text-center text-muted">กรุณาเลือกวันที่เพื่อค้นหา</td>
+        </tr>
+      {% endif %}
+    </tbody>
+  </table>
+</div>
+
+<!-- ===== Modal รายละเอียด (อยู่นอก table) ===== -->
+{% if filter_date %}
+  {% for receive in product_receives %}
+  <!-- Modal รายละเอียด -->
+<div class="modal fade" id="modal-{{ receive.receive_id }}" tabindex="-1">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">รายละเอียดการรับ {{ receive.receive_id }}</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <h6 class="fw-bold fs-5">วันที่: {{ receive.receive_date|date:"Y-m-d" }}</h6>
+        <h6 class="fw-bold fs-5">ผู้รับ: {{ receive.user.username }}</h6>
+
+        <table class="table table-bordered mt-3">
+          <thead>
+            <tr>
+              <th>รหัสสินค้า</th>
+              <th>ชื่อสินค้า</th>
+              <th>น้ำหนัก</th>   <!-- ✅ เพิ่มคอลัมน์น้ำหนัก -->
+              <th>จำนวน</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for item in receive.items.all %}
+            <tr>
+              <td>{{ item.product.product_id }}</td>
+              <td>{{ item.product.product_name }}</td>
+              <td>{{ item.product.get_weight_display }}</td> <!-- ✅ แสดงน้ำหนัก -->
+              <td>{{ item.quantity }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-bs-dismiss="modal">ปิด</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+  {% endfor %}
+{% endif %}
+
+<!-- SweetAlert2 -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+  let cart = [];
+
+  function selectWeight(btn, pid, pname, pw) {
+    btn.parentNode.querySelectorAll(".btn-weight").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    addToCart(pid, pname, pw);
+  }
+
+  function addToCart(pid, pname, pw) {
+    const ex = cart.find(i => i.productId === pid);
+    if (ex) {
+      ex.qty += 1;
+    } else {
+      cart.push({ productId: pid, productName: pname, productWeight: pw, qty: 1 });
+    }
+    updateCartDisplay();
+    Swal.fire({
+      toast: true,
+      position: "top-end",
+      icon: "success",
+      title: `เพิ่ม ${pname} (${pw})`,
+      showConfirmButton: false,
+      timer: 3000,
+      timerProgressBar: true
+    });
+  }
+
+  function updateCartDisplay() {
+    const b = document.getElementById("cart-body");
+    b.innerHTML = "";
+
+    if (cart.length === 0) {
+      b.innerHTML = `<tr><td colspan="5" class="text-center text-muted">ยังไม่มีสินค้าในตะกร้า</td></tr>`;
+    } else {
+      cart.forEach((it, i) => {
+        b.innerHTML += `
+          <tr>
+            <td>${it.productId}</td>
+            <td>${it.productName}</td>
+            <td>${it.productWeight}</td>
+            <td>
+              <input type="number" min="1" value="${it.qty}" onchange="updateQty(${i}, this.value)" class="qty-input"/>
+            </td>
+            <td>
+              <i class="bi bi-x-circle-fill text-danger remove-icon" onclick="removeFromCart(${i})"></i>
+            </td>
+          </tr>`;
+      });
+    }
+
+    document.getElementById("cart-count-text").textContent = `จำนวนรายการ: ${cart.length} รายการ`;
+    document.getElementById("cart-total-qty-text").textContent = `รวมทั้งหมด: ${cart.reduce((s, it) => s + it.qty, 0)} ถุง`;
+    document.getElementById("items_json").value = JSON.stringify(cart);
+  }
+
+  function updateQty(i, v) {
+    cart[i].qty = parseInt(v);
+    if (cart[i].qty < 1) cart[i].qty = 1;
+    updateCartDisplay();
+  }
+
+  function removeFromCart(i) {
+    Swal.fire({
+      title: "ลบสินค้า?",
+      text: "คุณแน่ใจหรือไม่ว่าจะลบ",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "ใช่, ลบเลย",
+      cancelButtonText: "ยกเลิก"
+    }).then(r => {
+      if (r.isConfirmed) {
+        cart.splice(i, 1);
+        updateCartDisplay();
+      }
+    });
+  }
+
+  document.getElementById("receive-form").addEventListener("submit", function(e) {
+    e.preventDefault();
+
+    if (cart.length === 0) {
+      Swal.fire("⚠️ ไม่มีสินค้า", "กรุณาเลือกอย่างน้อย 1 รายการ", "warning");
+      return;
+    }
+
+    Swal.fire({
+      title: "คุณต้องการรับสินค้าเข้าใช่หรือไม่?",
+      text: "ตรวจสอบข้อมูลก่อนยืนยัน",
+      icon: "question",
+      showCancelButton: true,
+      confirmButtonText: "✅ ใช่, รับสินค้า",
+      cancelButtonText: "❌ ยกเลิก"
+    }).then(r => {
+      if (r.isConfirmed) {
+        Swal.fire({
+          title: "สำเร็จ!",
+          text: "รับสินค้าเข้าคลังเรียบร้อยแล้ว",
+          icon: "success",
+          confirmButtonText: "ตกลง",
+          allowOutsideClick: false
+        }).then(() => {
+          e.target.submit();
+        });
+      }
+    });
+  });
+
+  window.addEventListener("load", function() {
+    if (window.location.hash === "#history-section") {
+      document.getElementById("history-section").scrollIntoView({ behavior: "smooth" });
+    }
+  });
+</script>
+
+{% endblock %}

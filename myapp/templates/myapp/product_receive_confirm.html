@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+{% block title %}ยืนยันการรับสินค้า{% endblock %}
+{% block content %}
+<div class="sheet">
+    <h2 class="page-title">ยืนยันการรับสินค้า</h2>
+    <p>รหัส: <strong>{{ receive_id }}</strong></p>
+    <p>วันที่รับสินค้า: <strong>{{ receive_date|date:"d/m/Y" }}</strong></p>
+
+
+    <div class="table-wrap">
+        <table class="flat">
+            <thead>
+                <tr>
+                    <th>รหัสสินค้า</th>
+                    <th>ชื่อสินค้า</th>
+                    <th class="center">จำนวน</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for it in items %}
+                <tr>
+                    <td>{{ it.product_code }}</td>
+                    <td>{{ it.name }}</td>
+                    <td class="center">{{ it.qty }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <form method="POST" action="{% url 'myapp:add_product_receive' %}">
+        {% csrf_token %}
+        <input type="hidden" name="receive_id" value="{{ receive_id }}">
+        <input type="hidden" name="receive_date" value="{{ receive_date }}">
+        <input type="hidden" name="items_json" value='{{ items|safe|escapejs }}'>
+        <button type="submit" class="btn btn-primary">ยืนยัน</button>
+        <a href="{% url 'myapp:product_receive_list' %}" class="btn">ยกเลิก</a>
+    </form>
+</div>
+{% endblock %}

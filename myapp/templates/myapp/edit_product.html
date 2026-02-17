@@ -1,0 +1,105 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/page_add.css' %}">
+<link rel="stylesheet" href="{% static 'css/button.css' %}">
+<!-- เพิ่ม SweetAlert2 -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+{% endblock %}
+
+{% block content %}
+<div class="add-section">
+    <h2>✏️ แก้ไขข้อมูลสินค้า</h2>
+
+    <!-- ✅ ลบ onsubmit เดิมออก -->
+    <form id="editProductForm" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <!-- รหัสสินค้า -->
+        <div class="form-group">
+            <label for="product_id">รหัสสินค้า</label>
+            <input type="text" id="product_id" name="product_id" value="{{ product.product_id }}" readonly>
+        </div>
+
+        <!-- ชื่อสินค้า -->
+        <div class="form-group">
+            <label for="product_name">ชื่อสินค้า</label>
+            <input type="text" id="product_name" name="product_name" value="{{ product.product_name }}" required>
+        </div>
+
+        <!-- ราคา -->
+        <div class="form-group">
+            <label for="price">ราคา</label>
+            <input type="number" id="price" name="price" value="{{ product.price|floatformat:0 }}" step="1" required>
+        </div>
+
+        <!-- น้ำหนัก -->
+        <div class="form-group">
+            <label for="weight">น้ำหนัก</label>
+            <select id="weight" name="weight" required>
+                {% for value, label in product.WEIGHT_CHOICES %}
+                <option value="{{ value }}" {% if product.weight == value %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <!-- เปลี่ยนรูปสินค้า -->
+        <div class="form-group">
+            <label for="image">เปลี่ยนรูปสินค้า</label>
+            <input type="file" id="image" name="image">
+        </div>
+
+        <!-- รูปปัจจุบัน -->
+        {% if product.image %}
+        <div class="form-group">
+            <label>รูปปัจจุบัน</label><br>
+            <img src="{{ product.image.url }}" class="img-thumbnail" style="max-width:200px; height:auto;">
+        </div>
+        {% endif %}
+
+        <br>
+        <div class="btn-container">
+            <button type="submit" class="btn btn-success">💾 บันทึกการแก้ไข</button>
+            <a href="{% url 'myapp:product_list' %}" class="btn btn-secondary">ย้อนกลับ</a>
+        </div>
+    </form>
+</div>
+
+<!-- ✅ SweetAlert2 Script -->
+<script>
+document.getElementById("editProductForm").addEventListener("submit", function (e) {
+    e.preventDefault(); // ป้องกัน submit ทันที
+
+    Swal.fire({
+        title: 'คุณแน่ใจหรือไม่?',
+        text: "ต้องการบันทึกการแก้ไขสินค้านี้หรือไม่",
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: 'บันทึกเลย!',
+        cancelButtonText: 'ยกเลิก'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            // ✅ เมื่อยืนยัน — ส่งฟอร์มจริง
+            e.target.submit();
+        }
+    });
+});
+</script>
+
+<!-- ✅ แสดง SweetAlert2 เมื่อ Django ส่ง message มา -->
+{% if messages %}
+<script>
+    {% for message in messages %}
+        Swal.fire({
+            icon: '{% if "success" in message.tags %}success{% elif "error" in message.tags %}error{% else %}info{% endif %}',
+            title: '{{ message|escapejs }}',
+            showConfirmButton: false,
+            timer: 2000
+        });
+    {% endfor %}
+</script>
+{% endif %}
+{% endblock %}

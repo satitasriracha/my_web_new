@@ -1,0 +1,146 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/page_add.css' %}">
+<link rel="stylesheet" href="{% static 'css/button.css' %}">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+{% endblock %}
+
+{% block content %}
+<div class="add-section">
+    <h2>➕ เพิ่มผู้ใช้ระบบ</h2>
+
+    <form method="post" id="userForm">
+        {% csrf_token %}
+
+        <!-- รหัสผู้ใช้ -->
+        <div class="form-group">
+            <label>รหัสผู้ใช้</label>
+            <input type="text" class="form-control" value="{{ next_user_id }}" readonly>
+        </div>
+
+        <!-- ชื่อ -->
+        <div class="form-group">
+            {{ user_form.username.label_tag }}
+            {{ user_form.username }}
+        </div>
+
+        <!-- ที่อยู่ -->
+        <div class="form-group">
+            {{ profile_form.address.label_tag }}
+            {{ profile_form.address }}
+        </div>
+
+        <!-- เบอร์โทร -->
+        <div class="form-group">
+            {{ profile_form.phone.label_tag }}
+            {{ profile_form.phone }}
+        </div>
+
+        <!-- ตำแหน่ง -->
+        <div class="form-group">
+            {{ profile_form.position.label_tag }}
+            <select name="position" class="form-control" required>
+                <option value="employee" {% if profile_form.position.value == "employee" %}selected{% endif %}>พนักงาน</option>
+                <option value="admin" {% if profile_form.position.value == "admin" %}selected{% endif %}>แอดมิน</option>
+                <option value="owner" {% if profile_form.position.value == "owner" %}selected{% endif %}>เจ้าของกิจการ</option>
+            </select>
+        </div>
+
+        <!-- รหัสผ่าน -->
+        <div class="form-group">
+            {{ user_form.password.label_tag }}
+            {{ user_form.password }}
+        </div>
+
+        <!-- ยืนยันรหัสผ่าน -->
+        <div class="form-group">
+            {{ user_form.confirm_password.label_tag }}
+            {{ user_form.confirm_password }}
+        </div>
+
+        <!-- ปุ่ม -->
+        <div class="form-buttons mt-3">
+            <button type="submit" class="btn btn-success">💾 บันทึก</button>
+            <a href="{% url 'myapp:user_list' %}" class="btn btn-secondary">ยกเลิก</a>
+        </div>
+    </form>
+</div>
+
+<!-- ✅ SweetAlert2 Script -->
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const form = document.getElementById("userForm");
+    const username = document.getElementById("id_username");
+    const password = document.getElementById("id_password");
+    const confirmPassword = document.getElementById("id_confirm_password");
+
+    form.addEventListener("submit", async function (e) {
+        e.preventDefault(); // หยุดส่งชั่วคราว
+
+        const user = username.value.trim();
+        if (!user) return;
+
+        // ✅ ตรวจสอบชื่อซ้ำแบบ AJAX
+        const res = await fetch(`?username=${encodeURIComponent(user)}`, {
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        });
+        const data = await res.json();
+
+        if (data.exists) {
+            Swal.fire({
+                icon: 'error',
+                title: 'ชื่อผู้ใช้ซ้ำ!',
+                text: `ชื่อ "${user}" ถูกใช้ในระบบแล้ว ❌`,
+                confirmButtonColor: '#d33'
+            });
+            return;
+        }
+
+        // ✅ ตรวจสอบรหัสผ่านไม่ตรงกัน
+        if (password.value !== confirmPassword.value) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'รหัสผ่านไม่ตรงกัน!',
+                text: 'กรุณากรอกใหม่อีกครั้ง ⚠️',
+                confirmButtonColor: '#f6c23e'
+            });
+            confirmPassword.value = "";
+            confirmPassword.focus();
+            return;
+        }
+
+        // ✅ ถ้าทุกอย่างถูกต้อง — ถามยืนยันก่อนบันทึก
+        Swal.fire({
+            title: 'คุณแน่ใจหรือไม่?',
+            text: 'ต้องการบันทึกข้อมูลผู้ใช้ใหม่นี้หรือไม่',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'บันทึกเลย!',
+            cancelButtonText: 'ยกเลิก'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                form.submit();
+            }
+        });
+    });
+});
+</script>
+
+<!-- ✅ แสดง SweetAlert2 เมื่อ Django ส่ง message กลับ -->
+{% if messages %}
+<script>
+{% for message in messages %}
+Swal.fire({
+    icon: '{% if "success" in message.tags %}success{% elif "error" in message.tags %}error{% else %}info{% endif %}',
+    title: '{{ message|escapejs }}',
+    showConfirmButton: false,
+    timer: 2000
+});
+{% endfor %}
+</script>
+{% endif %}
+{% endblock %}

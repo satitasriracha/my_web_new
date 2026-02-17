@@ -1,0 +1,102 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<style>
+    .container {
+        background-color: #fff;
+        padding: 40px;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        margin: 40px auto 0;
+        max-width: 700px;
+        font-size: 1.1rem;
+    }
+
+    h2 {
+        margin-bottom: 25px;
+        color: #2f4f4f;
+        font-weight: bold;
+        font-size: 2rem;
+        text-align: center;
+    }
+
+    form p {
+        margin-bottom: 16px;
+    }
+
+    label {
+        font-weight: bold;
+        display: block;
+        margin-bottom: 6px;
+    }
+
+    input,
+    select,
+    textarea {
+        width: 100%;
+        padding: 8px 12px;
+        border-radius: 6px;
+        border: 1px solid #ccc;
+        font-size: 1rem;
+        box-sizing: border-box;
+    }
+
+    .btn {
+        font-size: 1.05rem;
+        padding: 10px 16px;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        color: white;
+        margin-right: 10px;
+    }
+
+    .btn-success {
+        background-color: #90c692;
+    }
+
+    .btn-success:hover {
+        background-color: #9dd9a0;
+    }
+
+    .btn-secondary {
+        background-color: #aebfcd;
+    }
+
+    .btn-secondary:hover {
+        background-color: #92bad9;
+    }
+</style>
+
+
+<h2>📦 ข้อมูลร้านค้า</h2>
+
+{% if stores %}
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>ชื่อร้าน</th>
+            <th>ที่อยู่</th>
+            <th>เบอร์โทร</th>
+            <th>การจัดการ</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for store in stores %}
+        <tr>
+            <td>{{ store.name }}</td>
+            <td>{{ store.address }}</td>
+            <td>{{ store.phone }}</td>
+            <td>
+                <a href="{% url 'myapp:store_edit' store.pk %}" class="btn btn-warning btn-sm">แก้ไข</a>
+                <a href="{% url 'myapp:store_delete' store.pk %}" class="btn btn-danger btn-sm"
+                    onclick="return confirm('คุณแน่ใจว่าต้องการลบร้านค้านี้?');">ลบ</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p class="text-muted text-center">ยังไม่มีข้อมูลร้านค้า</p>
+{% endif %}
+

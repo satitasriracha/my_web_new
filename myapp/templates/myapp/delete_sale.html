@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block title %}ลบการขาย{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2>ลบการขาย</h2>
+    <p>คุณแน่ใจหรือไม่ว่าจะลบการขาย รหัส: <strong>{{ sale.sale_id }}</strong> ?</p>
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">ลบ</button>
+        <a href="{% url 'myapp:sale_list' %}" class="btn btn-secondary">ยกเลิก</a>
+    </form>
+</div>
+{% endblock %}

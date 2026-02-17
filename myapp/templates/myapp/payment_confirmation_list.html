@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+    .container {
+        background-color: #ffffff;
+        padding: 40px;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        margin-top: 40px;
+        font-size: 1.1rem;
+    }
+
+    h2 {
+        margin-bottom: 25px;
+        color: #2f4f4f;
+        font-weight: bold;
+        font-size: 2rem;
+    }
+
+    .btn {
+        font-size: 1.05rem;
+        padding: 10px 16px;
+    }
+
+    .btn-sm {
+        font-size: 1rem;
+        padding: 6px 12px;
+    }
+
+    .btn-primary {
+        background-color: #ffffff;
+        border: none;
+    }
+
+    .btn-primary:hover {
+        background-color: #b3f4b6;
+    }
+
+    .btn-warning,
+    .btn-danger {
+        color: white;
+    }
+
+    .table {
+        font-size: 1.05rem;
+        width: 100%;
+        table-layout: fixed;
+    }
+
+    .table thead {
+        background-color: #eaf5ea;
+    }
+
+    .table th {
+        text-align: center;
+        color: #2f4f4f;
+    }
+
+    .table th,
+    .table td {
+        word-wrap: break-word;
+        padding: 12px;
+        text-align: center;
+        border: 1px solid #ddd;
+    }
+
+    .table tbody tr:hover {
+        background-color: #f1f9f1;
+    }
+
+    .text-muted {
+        font-style: italic;
+    }
+</style>
+
+<div class="container">
+    <h2>รายการยืนยันการชำระเงิน</h2>
+
+    <a href="{% url 'myapp:add_payment_confirmation' %}" class="btn btn-success mb-3">+ เพิ่มการยืนยัน</a><br><br>
+
+    <table class="table table-bordered table-hover">
+        <thead>
+            <tr>
+                <th>รหัสใบเสร็จ</th>
+                <th>รหัสการขายสินค้า</th>
+                <th>วันที่ยืนยัน</th>
+                <th>ผู้ยืนยัน</th>
+                <th>จัดการ</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for c in confirmations %}
+            <tr>
+                <td>{{ c.confirmation_id }}</td>
+                <td>{{ c.payment.sale }}</td>
+                <td>{{ c.confirm_date }}</td>
+                <td>{{ c.user }}</td>
+                <td>
+                    <a href="{% url 'myapp:edit_payment_confirmation' c.confirmation_id %}"
+                        class="btn btn-sm btn-warning">✏️ แก้ไข</a>
+                    <a href="{% url 'myapp:delete_payment_confirmation' c.confirmation_id %}"
+                        class="btn btn-sm btn-danger" onclick="return confirm('คุณแน่ใจหรือไม่ที่จะลบ?');">🗑️ ลบ</a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="5" class="text-muted">ไม่มีข้อมูลการยืนยันการชำระเงิน</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

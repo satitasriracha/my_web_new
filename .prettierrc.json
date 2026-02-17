@@ -1,0 +1,23 @@
+{
+  "tabWidth": 2,
+  "useTabs": false,
+  "semi": true,
+  "singleQuote": false,
+  "printWidth": 80,
+  "htmlWhitespaceSensitivity": "ignore",
+  "bracketSameLine": false,
+  "overrides": [
+    {
+      "files": ["*.html", "*.htm"],
+      "options": {
+        "parser": "html"
+      }
+    },
+    {
+      "files": ["templates/**/*.html"],
+      "options": {
+        "parser": "babel" 
+      }
+    }
+  ]
+}

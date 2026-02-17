@@ -1,0 +1,143 @@
+{% extends "base.html" %}
+
+{% block title %}รายการจัดส่ง{% endblock %}
+
+{% block content %}
+<style>
+    .container {
+        background-color: #ffffff;
+        padding: 30px 40px;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        margin-top: 40px;
+        font-size: 1.1rem;
+    }
+
+    h2 {
+        margin-bottom: 25px;
+        color: #2f4f4f;
+        font-weight: bold;
+        font-size: 2rem;
+    }
+
+    .btn {
+        font-size: 1.05rem;
+        padding: 8px 14px;
+        border-radius: 6px;
+        text-decoration: none;
+        display: inline-block;
+        transition: background-color 0.3s ease;
+        border: none;
+        cursor: pointer;
+    }
+
+    .btn-sm {
+        font-size: 0.95rem;
+        padding: 7px 10px;
+        border-radius: 4px;
+    }
+
+    .btn-success {
+        background-color: #4CAF50;
+        color: white;
+    }
+
+    .btn-success:hover {
+        background-color: #45a049;
+    }
+
+    .btn-warning {
+        color: rgb(253, 61, 61);
+    }
+
+
+    .btn-danger {
+        color: rgb(255, 45, 45);
+    }
+
+
+    table.table {
+        font-size: 1.05rem;
+        width: 100%;
+        border-collapse: collapse;
+        table-layout: fixed;
+    }
+
+    table.table thead {
+        background-color: #eaf5ea;
+    }
+
+    table.table th,
+    table.table td {
+        padding: 15px;
+        text-align: center;
+        border: 1px solid #ddd;
+        word-wrap: break-word;
+    }
+
+    table.table th {
+        color: #2f4f4f;
+    }
+
+    table.table tbody tr:hover {
+        background-color: #f1f9f1;
+    }
+
+    .text-muted {
+        font-style: italic;
+    }
+
+    /* ✅ ปรับระยะห่างระหว่างปุ่ม */
+    .action-buttons {
+        display: flex;
+        justify-content: center;
+        gap: 15px;
+    }
+</style>
+
+<div class="container">
+    <h2>รายการจัดส่ง</h2>
+    <a href="{% url 'myapp:add_delivery' %}" class="btn btn-success mb-3">+ เพิ่มการจัดส่ง</a><br><br>
+
+    <table class="table table-bordered table-striped">
+        <thead>
+            <tr>
+                <th>รหัสจัดส่ง</th>
+                <th>รหัสการขายสินค้า</th>
+                <th>วันที่จัดส่ง</th>
+                <th>ผู้จัดส่ง</th>
+                <th>หมายเลขพัสดุ</th>
+                <th>บริษัทขนส่ง</th>
+                <th>ตัวเลือก</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for delivery in deliveries %}
+            <tr>
+                <td>{{ delivery.delivery_id }}</td>
+                <td>{{ delivery.sale.sale_id }}</td>
+                <td>{{ delivery.delivery_date }}</td>
+                <td>{{ delivery.user.name }}</td>
+                <td>{{ delivery.tracking_number }}</td>
+                <td>{{ delivery.company }}</td>
+                <td>
+                    <div class="action-buttons">
+                        <a href="{% url 'myapp:edit_delivery' delivery.delivery_id %}" class="btn btn-warning btn-sm">✏️
+                            แก้ไข</a>
+                        <form action="{% url 'myapp:delete_delivery' delivery.delivery_id %}" method="post">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-danger btn-sm"
+                                onclick="return confirm('คุณแน่ใจหรือไม่ที่จะลบ?');">🗑️ ลบ</button>
+                        </form>
+                    </div>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="7" class="text-muted">ไม่มีข้อมูลการจัดส่ง</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

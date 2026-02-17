@@ -1,0 +1,118 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/page_user.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="user-section">
+  <h2>📋 รายการผู้ใช้ระบบและลูกค้า</h2>
+  <br>
+
+  <!-- ปุ่มเพิ่มผู้ใช้ -->
+  <div style="margin-bottom: 15px">
+    <a href="{% url 'myapp:add_user' %}" class="add-user-btn">➕ เพิ่มข้อมูลผู้ใช้ระบบ</a>
+  </div>
+
+  <!-- ================= USERS ================= -->
+  <h3>👨‍💼 ผู้ใช้ระบบ</h3>
+  {% if users %}
+  <table class="table user-table">
+    <thead>
+      <tr>
+        <th>รหัสผู้ใช้</th>
+        <th>ชื่อ-สกุล</th>
+        <th>ตำแหน่ง</th>
+        <th>การจัดการ</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for user in users %}
+      <tr>
+        <td class="text-center">{{ user.user_id }}</td>
+        <td>{{ user.name }}</td>
+        <td class="text-center">{{ user.position }}</td>
+        <td class="text-center">
+          <a href="{{ user.edit_url }}" class="btn btn-sm btn-warning">✏️</a>
+          <a href="{{ user.delete_url }}"
+             class="btn btn-sm btn-danger"
+             onclick="confirmDelete(event, '{{ user.delete_url }}', '{{ user.name }}')">🗑️</a>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p class="text-muted">ยังไม่มีข้อมูลผู้ใช้</p>
+  {% endif %}
+
+  <!-- ================= CUSTOMERS ================= -->
+  <br>
+  <h3>👥 ลูกค้า</h3>
+  {% if customers %}
+  <table class="table user-table">
+    <thead>
+      <tr>
+        <th>รหัสลูกค้า</th>
+        <th>ชื่อ-สกุล</th>
+        <th>ที่อยู่</th>
+        <th>เบอร์โทร</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for customer in customers %}
+      <tr>
+        <td class="text-center">{{ customer.customer_id }}</td>
+        <td>{{ customer.name }}</td>
+        <td>{{ customer.address|default:"—" }}</td>
+        <td>{{ customer.phone|default:"—" }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p class="text-muted">ยังไม่มีข้อมูลลูกค้า</p>
+  {% endif %}
+</div>
+
+<!-- ================= SCRIPT SECTION ================= -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+/* ✅ ยืนยันก่อนลบผู้ใช้ */
+function confirmDelete(event, deleteUrl, userName) {
+  event.preventDefault(); // ป้องกันการเปิดลิงก์ทันที
+
+  Swal.fire({
+    title: 'คุณแน่ใจหรือไม่?',
+    text: `ต้องการลบผู้ใช้ ${userName} หรือไม่?`,
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#d33',
+    cancelButtonColor: '#6c757d',
+    confirmButtonText: 'ลบเลย!',
+    cancelButtonText: 'ยกเลิก'
+  }).then((result) => {
+    if (result.isConfirmed) {
+      window.location.href = deleteUrl; // ไปยัง URL ที่ลบผู้ใช้จริง
+    }
+  });
+}
+</script>
+
+<!-- ✅ แสดง SweetAlert2 เมื่อ Django ส่ง message มา -->
+{% if messages %}
+<script>
+  {% for message in messages %}
+    Swal.fire({
+      icon: '{% if "success" in message.tags %}success{% elif "error" in message.tags %}error{% else %}info{% endif %}',
+      title: '{{ message|escapejs }}',
+      showConfirmButton: false,
+      timer: 2000
+    });
+  {% endfor %}
+</script>
+{% endif %}
+
+{% endblock %}

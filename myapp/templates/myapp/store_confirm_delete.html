@@ -1,0 +1,11 @@
+{% extends 'base.html' %} {% block content %}
+<div class="container text-center">
+  <h2 class="mb-4">⚠️ ยืนยันการลบร้านค้า</h2>
+  <p>คุณแน่ใจหรือไม่ว่าต้องการลบร้านค้า <strong>"{{ store.name }}"</strong>?</p>
+  <form method="post">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-danger">🗑️ ลบ</button>
+    <a href="{% url 'store_list' %}" class="btn btn-secondary">ยกเลิก</a>
+  </form>
+</div>
+{% endblock %}

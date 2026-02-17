@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/page_user.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="user-section">
+    <h2>📋 รายชื่อลูกค้า</h2><br>
+
+    <!-- ปุ่มเพิ่มลูกค้า -->
+    <div style="margin-bottom: 15px; text-align:left;">
+        <a href="{% url 'myapp:add_customer' %}" class="add-user-btn">➕ เพิ่มลูกค้าใหม่</a>
+    </div>
+
+    <!-- ตารางลูกค้าทั่วไป -->
+    <h4>👥 ลูกค้าทั่วไป</h4>
+    {% if customers_regular %}
+    <table class="table user-table">
+        <thead>
+            <tr>
+                <th>รหัสลูกค้า</th>
+                <th>ชื่อ-สกุล</th>
+                <th>เบอร์โทร</th>
+                <th>ที่อยู่</th>
+                <th>การจัดการ</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for customer in customers_regular %}
+            <tr>
+                <td class="text-center">{{ customer.customer_id }}</td>
+                <td>{{ customer.name }}</td>
+                <td>{{ customer.phone }}</td>
+                <td>{{ customer.address }}</td>
+                <td class="text-center">
+                    <a href="{% url 'myapp:edit_customer' customer.pk %}" class="btn btn-sm btn-warning">✏️ </a>
+                    <a href="{% url 'myapp:delete_customer' customer.pk %}" class="btn btn-sm btn-danger"
+                        onclick="return confirm('คุณแน่ใจว่าต้องการลบลูกค้ารายนี้หรือไม่?');">🗑️ </a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p class="text-muted">ยังไม่มีข้อมูลลูกค้าทั่วไป</p>
+    {% endif %}
+</div>
+{% endblock %}

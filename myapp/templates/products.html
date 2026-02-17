@@ -1,0 +1,178 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}สินค้า - CHARCOAL HOME GREEN{% endblock %}
+
+{% block content %}
+<style>
+    body {
+        font-family: 'Kanit', sans-serif;
+        background: #f8fafb;
+        margin: 0;
+    }
+
+    .product-row {
+        display: flex;
+        gap: 20px;
+        max-width: 1100px;
+        margin: 40px auto;
+        padding: 0 20px;
+        flex-wrap: wrap;
+    }
+
+    .product-card {
+        background: #fff;
+        border-radius: 18px;
+        box-shadow: 0 6px 18px rgba(0, 0, 0, .1);
+        overflow: hidden;
+        text-align: center;
+        padding: 20px;
+        transition: .3s;
+        flex: 1 1 calc(25% - 20px);
+        min-width: 220px;
+    }
+
+    .product-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 12px 25px rgba(0, 0, 0, .18);
+    }
+
+    .product-card img {
+        width: 100%;
+        height: 180px;
+        object-fit: cover;
+        border-radius: 12px;
+    }
+
+    .product-info h3 {
+        font-size: 18px;
+        margin: 10px 0;
+    }
+
+    .desc {
+        font-size: 14px;
+        color: #666;
+        min-height: 36px;
+    }
+
+    .price {
+        font-size: 18px;
+        font-weight: bold;
+        color: #1f8f3a;
+        margin: 10px 0;
+    }
+
+    .btn-actions {
+        display: flex;
+        gap: 10px;
+        margin-top: 10px;
+    }
+
+    .btn-buy,
+    .btn-cart {
+        flex: 1;
+        padding: 10px 0;
+        border-radius: 25px;
+        font-weight: 600;
+        border: none;
+        cursor: pointer;
+    }
+
+    .btn-buy {
+        background: linear-gradient(135deg, #1f8f3a, #4caf50);
+        color: #fff;
+        text-decoration: none;
+    }
+
+    .btn-cart {
+        background: #eceff1;
+        color: #333;
+    }
+</style>
+
+<div class="product-row">
+
+    {% for p in uka_list %}
+    <div class="product-card">
+        <img src="{% if p.image %}{{ p.image.url }}{% else %}{% static 'images/uka.jpg' %}{% endif %}">
+        <div class="product-info">
+            <h3>{{ p.product_name }}<br>({{ p.weight|floatformat:"-0" }} กิโลกรัม)</h3>
+            <p class="desc">จุดติดง่าย ไม่แตกประทุ เหมาะครัวเรือน</p>
+            <div class="price">฿{{ p.price }}</div>
+            <div class="btn-actions">
+                <a href="{% url 'myapp:add_to_cart' p.product_id %}?next=cart" class="btn-buy">
+                    🛒 ซื้อเลย
+                </a>
+                <button type="button" class="btn-cart"
+                    onclick="event.preventDefault(); event.stopPropagation(); addToCart('{{ p.product_id }}');">
+                    ➕ ตะกร้า
+                </button>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+
+    {% for p in koukang_list %}
+    <div class="product-card">
+        <img src="{% if p.image %}{{ p.image.url }}{% else %}{% static 'images/koukan.jpeg' %}{% endif %}">
+        <div class="product-info">
+            <h3>{{ p.product_name }}<br>({{ p.weight|floatformat:"-0" }} กิโลกรัม)</h3>
+            <p class="desc">ไฟแรง ให้ความร้อนสูง เหมาะร้านอาหาร</p>
+            <div class="price">฿{{ p.price }}</div>
+            <div class="btn-actions">
+                <a href="{% url 'myapp:add_to_cart' p.product_id %}?next=cart" class="btn-buy">
+                    🛒 ซื้อเลย
+                </a>
+
+                <button type="button" class="btn-cart"
+                    onclick="event.preventDefault(); event.stopPropagation(); addToCart('{{ p.product_id }}');">
+                    ➕ ตะกร้า
+                </button>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+
+    {% for p in kaset_list %}
+    <div class="product-card">
+        <img src="{% if p.image %}{{ p.image.url }}{% else %}{% static 'images/kase.jpg' %}{% endif %}">
+        <div class="product-info">
+            <h3>{{ p.product_name }}<br>({{ p.weight|floatformat:"-0" }} กิโลกรัม)</h3>
+            <p class="desc">ราคาประหยัด หาซื้อง่าย ใช้ได้ทั่วไป</p>
+            <div class="price">฿{{ p.price }}</div>
+            <div class="btn-actions">
+                <a href="{% url 'myapp:add_to_cart' p.product_id %}?next=cart" class="btn-buy">
+                    🛒 ซื้อเลย
+                </a>
+
+                <button type="button" class="btn-cart"
+                    onclick="event.preventDefault(); event.stopPropagation(); addToCart('{{ p.product_id }}');">
+                    ➕ ตะกร้า
+                </button>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+
+    {% for p in makam_list %}
+    <div class="product-card">
+        <img src="{% if p.image %}{{ p.image.url }}{% else %}{% static 'images/makam.jpg' %}{% endif %}">
+        <div class="product-info">
+            <h3>{{ p.product_name }}<br>({{ p.weight|floatformat:"-0" }} กิโลกรัม)</h3>
+            <p class="desc">ไฟแรง ติดทนนาน เหมาะปิ้งย่าง</p>
+            <div class="price">฿{{ p.price }}</div>
+            <div class="btn-actions">
+                <a href="{% url 'myapp:add_to_cart' p.product_id %}?next=cart" class="btn-buy">
+                    🛒 ซื้อเลย
+                </a>
+
+                <button type="button" class="btn-cart"
+                    onclick="event.preventDefault(); event.stopPropagation(); addToCart('{{ p.product_id }}');">
+                    ➕ ตะกร้า
+                </button>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+
+</div>
+{% endblock %}

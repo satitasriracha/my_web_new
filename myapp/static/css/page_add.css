@@ -1,0 +1,79 @@
+/* page_add.css - ใช้เป็นหลักสำหรับทุกหน้า Add/Edit */
+
+.add-section {
+    background-color: #ffffff;
+    padding: 40px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    margin: 40px auto;
+    font-size: 1.1rem;
+    max-width: 700px;
+}
+
+.add-section h2 {
+    margin-bottom: 25px;
+    color: #2f4f4f;
+    font-weight: bold;
+    font-size: 2rem;
+    text-align: center;
+}
+
+/* ฟอร์ม */
+form {
+    margin-top: 20px;
+}
+
+form p {
+    margin-bottom: 16px;
+}
+
+label {
+    font-weight: bold;
+    display: block;
+    margin-bottom: 6px;
+}
+
+input[type="text"],
+input[type="number"],
+input[type="file"],
+input[type="date"],
+textarea,
+select {
+    width: 100%;
+    padding: 8px 12px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    font-size: 1rem;
+    box-sizing: border-box;
+}
+
+input[readonly] {
+    background-color: #f8f8f8;
+}
+
+/* ปุ่ม */
+.btn {
+    font-size: 1.05rem;
+    padding: 10px 16px;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+}
+
+.btn-success {
+    background-color: #90c692;
+    color: #fff;
+}
+
+.btn-success:hover {
+    background-color: #9dd9a0;
+}
+
+.btn-secondary {
+    background-color: #aebfcd;
+    color: #fff;
+}
+
+.btn-secondary:hover {
+    background-color: #92bad9;
+}

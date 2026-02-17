@@ -1,0 +1,122 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/page_add.css' %}">
+<link rel="stylesheet" href="{% static 'css/button.css' %}">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+{% endblock %}
+
+{% block content %}
+<div class="add-section">
+    <h2>👤 แก้ไขข้อมูลผู้ใช้</h2>
+
+    <form id="editUserForm" method="post" action="{% url 'myapp:edit_user' user_code %}">
+        {% csrf_token %}
+
+        <!-- รหัสผู้ใช้ -->
+        <div class="form-group">
+            <label for="user_id">รหัสผู้ใช้</label>
+            <input type="text" id="user_id" name="user_id" value="{{ user_code }}" readonly>
+        </div>
+
+        <!-- ชื่อผู้ใช้ -->
+        <div class="form-group">
+            <label for="username">ชื่อผู้ใช้</label>
+            <input type="text" id="username" name="username" value="{{ user_obj.username }}" required>
+        </div>
+
+        <!-- ตำแหน่ง -->
+        <div class="form-group">
+            <label for="position">ตำแหน่ง</label>
+            <select id="position" name="position" class="form-control">
+                {% for value,label in position_choices %}
+                <option value="{{ value }}" {% if profile.position == value %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <!-- ที่อยู่ -->
+        <div class="form-group">
+            <label for="address">ที่อยู่</label>
+            <textarea id="address" name="address" rows="2">{{ profile.address }}</textarea>
+        </div>
+
+        <!-- เบอร์โทร -->
+        <div class="form-group">
+            <label for="phone">เบอร์โทร</label>
+            <input type="text" id="phone" name="phone" value="{{ profile.phone }}">
+        </div>
+
+        <!-- รหัสผ่าน -->
+        <div class="form-group">
+            <label for="password">รหัสผ่าน (ถ้าไม่แก้ไขให้เว้นว่าง)</label>
+            <input type="password" id="password" name="password">
+        </div><br>
+
+        <div class="btn-container">
+            <button type="submit" class="btn btn-success">💾 บันทึกการแก้ไข</button>
+            <a href="{% url 'myapp:user_list' %}" class="btn btn-secondary">ย้อนกลับ</a>
+        </div>
+    </form>
+</div>
+
+<!-- ================= SCRIPT SECTION ================= -->
+<script>
+const form = document.getElementById('editUserForm');
+const usernameInput = document.getElementById('username');
+
+form.addEventListener('submit', async function (e) {
+    e.preventDefault();
+
+    const username = usernameInput.value.trim();
+    if (!username) return;
+
+    // ✅ ตรวจสอบชื่อซ้ำแบบเรียลไทม์
+    const res = await fetch(`?username=${encodeURIComponent(username)}`, {
+        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+    });
+    const data = await res.json();
+
+    if (data.exists) {
+        Swal.fire({
+            icon: 'error',
+            title: 'ชื่อผู้ใช้ซ้ำ!',
+            text: `ชื่อ "${username}" ถูกใช้ในระบบแล้ว ❌`,
+            confirmButtonColor: '#d33',
+        });
+        return;
+    }
+
+    // ✅ ยืนยันก่อนบันทึก
+    Swal.fire({
+        title: 'คุณแน่ใจหรือไม่?',
+        text: "ต้องการบันทึกการแก้ไขข้อมูลผู้ใช้นี้หรือไม่",
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: 'บันทึกเลย!',
+        cancelButtonText: 'ยกเลิก'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            form.submit();
+        }
+    });
+});
+</script>
+
+<!-- ✅ แสดง SweetAlert2 สำหรับข้อความจาก Django -->
+{% if messages %}
+<script>
+  {% for message in messages %}
+    Swal.fire({
+      icon: '{% if "success" in message.tags %}success{% elif "error" in message.tags %}error{% else %}info{% endif %}',
+      title: '{{ message|escapejs }}',
+      showConfirmButton: false,
+      timer: 2000
+    });
+  {% endfor %}
+</script>
+{% endif %}
+{% endblock %}

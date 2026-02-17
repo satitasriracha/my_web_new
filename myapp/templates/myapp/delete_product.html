@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2>ลบสินค้า</h2>
+<p>คุณแน่ใจหรือไม่ว่าต้องการลบสินค้า {{ product.product_name }}?</p>
+<form method="post">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-danger">ลบ</button>
+    <a href="{% url 'product_list' %}" class="btn btn-secondary">ยกเลิก</a>
+</form>
+{% endblock %}

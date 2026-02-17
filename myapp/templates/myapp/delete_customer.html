@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2>ยืนยันการลบลูกค้า</h2>
+
+<p>คุณต้องการลบลูกค้า <strong>{{ customer.name }}</strong> ใช่หรือไม่?</p>
+
+<form method="post">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-danger">ลบ</button>
+    <a href="{% url 'myapp:customer_list' %}" class="btn btn-secondary">ยกเลิก</a>
+</form>
+
+{% endblock %}

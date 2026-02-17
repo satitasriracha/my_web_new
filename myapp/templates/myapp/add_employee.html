@@ -1,0 +1,48 @@
+{% extends 'base.html' %} {% block content %}
+<div class="add-section">
+  <h2>
+    {% if edit %}✏️ แก้ไขข้อมูลพนักงาน{% else %}➕ เพิ่มพนักงานใหม่{% endif %}
+  </h2>
+
+  <form method="post">
+    {% csrf_token %} {{ form.non_field_errors }}
+
+    <!-- ชื่อ -->
+    <div class="form-group">
+      <label for="{{ form.first_name.id_for_label }}"
+        >{{ form.first_name.label }}</label
+      >
+      {{ form.first_name }}
+    </div>
+
+    <!-- นามสกุล -->
+    <div class="form-group">
+      <label for="{{ form.last_name.id_for_label }}"
+        >{{ form.last_name.label }}</label
+      >
+      {{ form.last_name }}
+    </div>
+
+    <!-- เบอร์โทร -->
+    <div class="form-group">
+      <label for="{{ form.phone.id_for_label }}">{{ form.phone.label }}</label>
+      {{ form.phone }}
+    </div>
+
+    <!-- ที่อยู่ -->
+    <div class="form-group">
+      <label for="{{ form.address.id_for_label }}"
+        >{{ form.address.label }}</label
+      >
+      {{ form.address }}
+    </div>
+
+    <div class="form-buttons mt-3">
+      <button type="submit" class="btn btn-success">💾 บันทึก</button>
+      <a href="{% url 'myapp:employee_list' %}" class="btn btn-secondary"
+        >ย้อนกลับ</a
+      >
+    </div>
+  </form>
+</div>
+{% endblock %}

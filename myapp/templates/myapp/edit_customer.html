@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="add-section">
+    <h2>✏️ แก้ไขข้อมูลลูกค้า</h2>
+
+    <form method="post" action="{% url 'myapp:edit_customer' customer.pk %}">
+        {% csrf_token %}
+        {{ form.non_field_errors }}
+
+        {% for field in form %}
+        <div class="form-group">
+            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+            {{ field }}
+            {% if field.errors %}
+            <div class="text-danger">{{ field.errors }}</div>
+            {% endif %}
+        </div>
+        {% endfor %}
+
+        <div class="form-buttons mt-3">
+            <button type="submit" class="btn btn-success">💾 บันทึกการแก้ไข</button>
+            <a href="{% url 'myapp:customer_list' %}" class="btn btn-secondary">ย้อนกลับ</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

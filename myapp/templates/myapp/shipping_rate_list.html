@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/page_user.css' %}">
+<!-- ✅ เพิ่ม SweetAlert2 -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+{% endblock %}
+
+{% block content %}
+<div class="user-section">
+  <h2>🚚 อัตราค่าขนส่ง</h2>
+  <br>
+  <a href="{% url 'myapp:shipping_rate_create' %}" class="add-user-btn">
+    ➕ เพิ่มอัตราค่าขนส่ง
+  </a>
+
+  <table class="user-table">
+    <thead>
+      <tr>
+        <th>น้ำหนัก (กก.)</th>
+        <th>อัตราค่าขนส่ง (บาท)</th>
+        <th>การจัดการ</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for rate in rates %}
+      <tr>
+        <td>{{ rate.weight|floatformat:"-0" }}</td>
+        <td>{{ rate.rate|floatformat:"-0" }}</td>
+        <td>
+          <a href="{% url 'myapp:shipping_rate_edit' rate.pk %}" class="btn btn-sm btn-warning">✏️</a>
+
+          <!-- ✅ ปุ่มลบแบบใช้ URL ของ Django -->
+          <button class="btn btn-sm btn-danger"
+                  onclick="confirmDelete('{% url 'myapp:shipping_rate_delete' rate.pk %}')">🗑️</button>
+        </td>
+      </tr>
+      {% empty %}
+      <tr>
+        <td colspan="3" class="text-center text-muted">ไม่มีข้อมูล</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<!-- ✅ ฟังก์ชัน SweetAlert2 -->
+<script>
+function confirmDelete(deleteUrl) {
+  Swal.fire({
+    title: 'คุณแน่ใจหรือไม่?',
+    text: 'อัตราค่าขนส่งนี้จะถูกลบถาวร!',
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#d33',
+    cancelButtonColor: '#6c757d',
+    confirmButtonText: 'ลบเลย!',
+    cancelButtonText: 'ยกเลิก'
+  }).then((result) => {
+    if (result.isConfirmed) {
+      window.location.href = deleteUrl;
+    }
+  });
+}
+</script>
+
+<!-- ✅ แสดง SweetAlert2 สำหรับข้อความจาก Django -->
+{% if messages %}
+<script>
+  {% for message in messages %}
+    Swal.fire({
+      icon: '{% if "success" in message.tags %}success{% elif "error" in message.tags %}error{% else %}info{% endif %}',
+      title: '{{ message|escapejs }}',
+      showConfirmButton: false,
+      timer: 2000
+    });
+  {% endfor %}
+</script>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="add-section">
+    <h2>{% if edit %}แก้ไขการจัดส่ง{% else %}เพิ่มการจัดส่ง{% endif %}</h2>
+
+    <form method="post">
+        {% csrf_token %}
+        {% for field in form %}
+        <div class="form-group">
+            {{ field.label_tag }}
+            {{ field }}
+            {% if field.errors %}
+            <div class="text-danger">{{ field.errors }}</div>
+            {% endif %}
+        </div>
+        {% endfor %}
+
+        <button type="submit" class="btn btn-success">
+            {% if edit %}บันทึกการแก้ไข{% else %}บันทึก{% endif %}
+        </button>
+        <a href="{% url 'myapp:delivery_list' %}" class="btn btn-secondary">ยกเลิก</a>
+    </form>
+</div>
+{% endblock %}

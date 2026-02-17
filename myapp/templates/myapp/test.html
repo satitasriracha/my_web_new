@@ -1,0 +1,13 @@
+<form method="POST" action="{% url 'myapp:add_sale' %}" id="sale-form">
+  {% csrf_token %}
+  <div class="row mb-3">
+    <div class="col-md-4">
+      <label>รหัสการขาย</label>
+      <input class="form-control"
+             type="text"
+             name="sale_code"
+             value="{{ preview_code }}"
+             readonly>
+    </div>
+  </div>
+</form>

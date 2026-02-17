@@ -1,0 +1,140 @@
+:root {
+    --brand: #6cc3a0;
+    --brand-light: #eafaf3;
+    --border: #e6e6e6;
+    --text-primary: #2f4f4f;
+    --text-muted: #6b7680;
+    --danger: #e67a7a;
+    --danger-light: #fdeaea;
+    --bg-light: #f9f9f9;
+    --bg-white: #ffffff;
+    --row-light: #fafbfc;
+}
+
+body {
+    font-family: 'Arial', sans-serif;
+    background: var(--bg-light);
+    color: var(--text-primary);
+}
+
+.sheet {
+    max-width: 1100px;
+    margin: 28px auto;
+    background: var(--bg-white);
+    padding: 24px 28px 36px;
+    border-radius: 16px;
+    box-shadow: 0 8px 22px rgba(0, 0, 0, .06);
+}
+
+.page-title {
+    font-size: 24px;
+    font-weight: 800;
+    margin-bottom: 12px;
+    color: var(--brand);
+}
+
+.subtext {
+    color: var(--text-muted);
+    font-size: 14px;
+    margin-bottom: 14px;
+}
+
+.table-wrap {
+    margin-top: 24px;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+    background: var(--bg-white);
+}
+
+table.flat {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.flat th,
+.flat td {
+    padding: 10px;
+    border-bottom: 1px solid var(--border);
+    text-align: center;
+}
+
+.flat thead th {
+    background: var(--brand-light);
+    font-weight: bold;
+}
+
+.flat tbody tr:nth-child(odd) {
+    background: var(--row-light);
+}
+
+.btn-plus,
+.btn-clear,
+.btn-primary {
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.btn-plus {
+    border: 1px solid var(--brand);
+    background: var(--bg-white);
+}
+
+.btn-plus:hover {
+    background: var(--brand-light);
+}
+
+.btn-clear {
+    border: 1px solid var(--danger);
+    color: var(--danger);
+    background: var(--bg-white);
+}
+
+.btn-clear:hover {
+    background: var(--danger-light);
+}
+
+.btn-primary {
+    background: #ff9966;
+    color: #fff;
+    border: none;
+}
+
+.btn-primary:hover {
+    background: #ff7b42;
+}
+
+.chip {
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 13px;
+}
+
+.chip.gray {
+    background: #f0f0f0;
+}
+
+.chip.green {
+    background: var(--brand-light);
+    color: #0c6d27;
+    border: 1px solid var(--brand);
+}
+
+.toolbar-btm {
+    display: flex;
+    justify-content: space-between;
+    padding: 12px;
+    margin-top: 12px;
+    background: var(--bg-light);
+    border-radius: 12px;
+}
+
+.history-title {
+    margin-top: 40px;
+    font-size: 20px;
+    font-weight: bold;
+    color: var(--text-primary);
+}

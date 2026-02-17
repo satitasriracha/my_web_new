@@ -1,0 +1,364 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>Login - Charcoal Home Green</title>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <link rel="stylesheet" href="{% static 'css/style.css' %}" />
+  <link href="https://fonts.googleapis.com/css2?family=Prompt&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: "Prompt", sans-serif;
+      background-image: url("{% static 'images/loginpage.webp' %}");
+      background-size: cover;
+      background-position: center;
+      margin: 0;
+      padding: 0;
+    }
+
+    /* ===== Header ===== */
+    .header-top {
+      background-color: #557b7c;
+      color: white;
+      text-align: center;
+      padding: 10px 0;
+    }
+
+    .header-main {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 50px;
+      background-color: white;
+      border-bottom: 2px solid #ccc;
+      position: relative;
+    }
+
+    .header-left,
+    .header-center,
+    .header-right {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .header-left {
+      justify-content: flex-start;
+    }
+
+    .header-right {
+      justify-content: flex-end;
+    }
+
+    .header-main img {
+      height: 60px;
+      margin-right: 15px;
+    }
+
+    .brand {
+      font-size: 24px;
+      font-weight: bold;
+      color: #a89951;
+    }
+
+    .slogan {
+      font-size: 14px;
+      color: #777;
+    }
+
+    .menu {
+      display: flex;
+      gap: 40px;
+      font-weight: bold;
+      font-size: 16px;
+      margin-left: 50px;
+    }
+
+    .menu a {
+      color: black;
+      text-decoration: none;
+    }
+
+    .login-btn {
+      padding: 8px 20px;
+      border: 2px solid black;
+      background: white;
+      font-weight: bold;
+      border-radius: 8px;
+    }
+
+    /* ===== Login Box ===== */
+    html,
+    body {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      margin: 0;
+      padding: 0;
+    }
+
+    .login-container {
+      flex: 1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 90vh;
+      padding: 100px 0;
+    }
+
+    .login-box {
+      background: rgba(255, 255, 255, 0.45);
+      /* โปร่งแสง */
+      width: 320px;
+      padding: 30px 25px;
+      border-radius: 20px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+      border: 1px solid rgba(255, 255, 255, 0.6);
+      /* ขอบขาว */
+      backdrop-filter: blur(10px);
+      /* ทำให้เบลอพื้นหลัง */
+      position: relative;
+    }
+
+    .login-box h2 {
+      text-align: center;
+      font-size: 26px;
+      margin-bottom: 25px;
+      font-weight: bold;
+      color: #2b1e1e;
+    }
+
+    .login-box label {
+      font-size: 15px;
+      color: #555;
+      display: flex;
+      align-items: center;
+      margin: 12px 0 5px;
+    }
+
+    .login-box input[type="text"],
+    .login-box input[type="password"] {
+      width: 100%;
+      padding: 10px;
+      border: none;
+      border-bottom: 1px solid #aaa;
+      background: transparent;
+      outline: none;
+      font-size: 14px;
+    }
+
+    .login-box input[type="checkbox"] {
+      margin-right: 5px;
+    }
+
+    .login-box .remember {
+      display: flex;
+      align-items: center;
+      margin-top: 10px;
+      font-size: 13px;
+      color: #444;
+    }
+
+    .login-box button {
+      width: 100%;
+      padding: 10px;
+      margin-top: 20px;
+      background: linear-gradient(to bottom, #cfcfcf, #888888);
+      border: none;
+      color: white;
+      font-weight: bold;
+      border-radius: 8px;
+      font-size: 16px;
+    }
+
+    .login-box .register-link {
+      text-align: center;
+      margin-top: 15px;
+      font-size: 13px;
+      color: #333;
+    }
+
+    .login-box .register-link a {
+      font-weight: bold;
+      color: black;
+      text-decoration: none;
+    }
+
+    .error {
+      color: red;
+      text-align: center;
+      margin-top: 10px;
+    }
+
+    /* ===== Footer ===== */
+    footer {
+      background-color: #557b7c;
+      color: white;
+      padding: 30px 50px;
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+    }
+
+    footer div {
+      width: 45%;
+    }
+
+    footer h3 {
+      margin-bottom: 10px;
+    }
+
+    footer p {
+      margin: 5px 0;
+    }
+
+    footer a {
+      color: white;
+      text-decoration: none;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Header -->
+  <div class="header-main">
+    <div class="header-left">
+      <a href="{% url 'myapp:root_home' %}" style="display: flex; align-items: center; text-decoration: none">
+        <img src="{% static 'images/logo.gif' %}" alt="โลโก้" class="logo-img" />
+        <div>
+          <div class="brand">CHARCOAL HOME GREEN</div>
+          <div class="slogan">ถ่านบ้านเขียว</div>
+        </div>
+      </a>
+    </div>
+
+    <div class="header-right">
+      <a href="{% url 'myapp:login' %}">
+        <button class="login-btn">Login</button>
+      </a>
+    </div>
+  </div>
+
+  <!-- Login Form -->
+  <div class="login-container">
+    <div class="login-box">
+      <h2>Login</h2>
+      <form method="post">
+        {% csrf_token %}
+        <label for="username">Username</label>
+        <input type="text" id="username" name="username" required />
+
+        <label for="password">Password</label>
+        <div style="position: relative">
+          <input type="password" id="password" name="password" required style="padding-right: 30px" />
+          <i class="fa-regular fa-eye" id="togglePassword" style="
+                position: absolute;
+                top: 50%;
+                right: 10px;
+                transform: translateY(-50%);
+                cursor: pointer;
+                color: #666;
+              "></i>
+        </div>
+
+        <div class="remember">
+          <input type="checkbox" id="remember" name="remember" />
+          <label for="remember">Remember me</label>
+        </div>
+
+        <button type="submit">Login</button>
+
+        <div class="register-link">
+          Don’t have an account?<a href="{% url 'myapp:register' %}">
+            Register</a>
+        </div>
+        <div class="register-link">
+          <a href="{% url 'myapp:forgot_password' %}">Forgot Password?</a>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer>
+    <div>
+      <h3>About us</h3>
+      <p>
+        <strong>CHARCOAL HOME GREEN</strong><br />
+        ผลิตและจำหน่ายถ่าน ขายส่งถ่าน ถ่านไม้ ปิ้งและสุก
+        พร้อมส่งตรงถึงผู้บริโภค และสามารถรับหน้าร้านได้
+      </p>
+    </div>
+    <div>
+      <h3>Contact</h3>
+      <p>
+        📍 285 หมู่11 ต.โนนท่อน อ.เมือง จ.ขอนแก่น 40000<br />
+        📞 093-567-2864<br />
+        ✉ charcoalhomegreen@gmail.com
+      </p>
+    </div>
+  </footer>
+
+  <!-- ✅ 1. Toggle Password (ทำงานทุกครั้ง) -->
+  <script>
+    const togglePassword = document.getElementById("togglePassword");
+    const passwordInput = document.getElementById("password");
+
+    togglePassword.addEventListener("click", function () {
+      const type =
+        passwordInput.getAttribute("type") === "password" ? "text" : "password";
+      passwordInput.setAttribute("type", type);
+      this.classList.toggle("fa-eye");
+      this.classList.toggle("fa-eye-slash");
+    });
+  </script>
+
+  <!-- ✅ 2. SweetAlert (ทำงานเฉพาะเมื่อมี status เท่านั้น) -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+  {% if status %}
+  <script>
+    {% if status == "username_not_found" %}
+    Swal.fire({
+      icon: "error",
+      title: "ไม่พบชื่อผู้ใช้",
+      text: "กรุณากรอกชื่อผู้ใช้ใหม่อีกครั้ง",
+      confirmButtonText: "ตกลง",
+      confirmButtonColor: "#557B7C"
+    });
+    {% elif status == "incorrect_password" %}
+    Swal.fire({
+      icon: "warning",
+      title: "รหัสผ่านไม่ถูกต้อง",
+      text: "กรุณากรอกรหัสผ่านใหม่อีกครั้ง",
+      confirmButtonText: "ตกลง",
+      confirmButtonColor: "#557B7C"
+    });
+    {% elif status == "success" %}
+    Swal.fire({
+      icon: "success",
+      title: "เข้าสู่ระบบสำเร็จ!",
+      text: "กำลังนำคุณไปยังหน้าแรก...",
+      showConfirmButton: false,
+      timer: 2000,
+      timerProgressBar: true,
+      didClose: () => {
+        window.location.href = "{% url 'myapp:home' %}";
+      }
+    });
+    {% endif %}
+  </script>
+  {% endif %}
+
+</body>
+
+</html>

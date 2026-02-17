@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+
+{% block title %}ลบการรับสินค้า{% endblock %}
+
+{% block content %}
+<h1 class="mb-4 text-danger">ยืนยันการลบ</h1>
+
+<p>คุณแน่ใจหรือไม่ว่าต้องการลบการรับสินค้า <strong>{{ receive.receive_id }}</strong>?</p>
+
+<form method="post">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-danger">ใช่, ลบ</button>
+    <a href="{% url 'myapp:product_receive_list' %}" class="btn btn-secondary">ยกเลิก</a>
+</form>
+{% endblock %}

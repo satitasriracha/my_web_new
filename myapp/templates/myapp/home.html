@@ -1,0 +1,194 @@
+{% extends "base.html" %} 
+{% load static %}
+{% block title %}CHARCOAL HOME GREEN{% endblock %}
+
+{% block content %}
+<style>
+    body {
+        font-family: 'Kanit', sans-serif;
+        margin: 0;
+        background: #fefefe;
+    }
+
+    /* Hero Section */
+    .hero {
+        position: relative;
+        height: 100vh;
+        background: url("{% static 'images/chacha.jpg' %}") center/cover fixed no-repeat;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        color: #fff;
+        overflow: hidden;
+    }
+    .hero::before {
+        content: "";
+        position: absolute;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background: rgba(77, 73, 73, 0.35);
+        z-index: 1;
+    }
+
+    /* Particle Effect */
+    .particles {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        top: 0; left: 0;
+        overflow: hidden;
+        z-index: 1;
+    }
+    .particle {
+        position: absolute;
+        background: rgba(255,255,255,0.8);
+        border-radius: 50%;
+        animation: floatUp 10s linear infinite;
+    }
+    @keyframes floatUp {
+        from { transform: translateY(100vh) scale(0.5); opacity: 0.7; }
+        to   { transform: translateY(-10vh) scale(1); opacity: 0; }
+    }
+
+    /* Hero Content */
+    .hero-content {
+        position: relative;
+        z-index: 2;
+        max-width: 800px;
+        padding: 20px;
+        animation: fadeInUp 1.5s ease;
+    }
+    .hero-content h1 {
+        color: #c6ffd4ff;
+        font-size: 56px;
+        margin-bottom: 20px;
+        text-shadow: 0 0 8px rgba(215, 239, 215, 0.8), 2px 2px 6px rgba(0,0,0,0.6);
+    }
+    .hero-content p {
+        font-size: 22px;
+        line-height: 1.6;
+    }
+
+    /* Section */
+    .section {
+        padding: 60px 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 30px;
+        max-width: 1100px;
+        margin: 0 auto;
+        opacity: 0;
+        transform: translateY(40px);
+        transition: all 1s ease;
+    }
+    .section.show {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    .section:nth-child(even) {
+        flex-direction: row-reverse;
+        background: #f8fafb;
+    }
+    .section img {
+        width: 320px;
+        height: 220px;
+        object-fit: cover;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+    .section-content {
+        max-width: 600px;
+    }
+    .section-content h2 {
+        font-size: 28px;
+        margin-bottom: 15px;
+        color: #1f8f3a;
+    }
+    .section-content p {
+        font-size: 18px;
+        color: #444;
+        line-height: 1.6;
+    }
+
+    /* Animation */
+    @keyframes fadeInUp {
+        0% { opacity: 0; transform: translateY(40px); }
+        100% { opacity: 1; transform: translateY(0); }
+    }
+</style>
+
+<!-- Hero Section -->
+<section class="hero">
+    <div class="particles" id="particles"></div> <!-- ดวงไฟ effect -->
+    <div class="hero-content">
+        <h1>CHARCOAL HOME GREEN</h1>
+        <p>ถ่านไม้คุณภาพสูง ความร้อนแรง เผาได้นาน ประหยัดพลังงาน และเป็นมิตรต่อสิ่งแวดล้อม</p>
+    </div>
+</section>
+
+<!-- Section 1 : ยูคา -->
+<section class="section">
+    <img src="{% static 'images/uka.jpg' %}" alt="ถ่านไม้ยูคา">
+    <div class="section-content">
+        <h2>🌳 ถ่านไม้ยูคา</h2>
+        <p>✨ จุดติดง่าย 🔥 ไฟสม่ำเสมอ ไม่แตกประทุ เหมาะสำหรับครัวเรือนทั่วไป 
+        ราคาย่อมเยาและใช้งานได้หลากหลาย</p>
+    </div>
+</section>
+
+<!-- Section 2 : โกงกาง -->
+<section class="section">
+    <img src="{% static 'images/koukan.jpeg' %}" alt="ถ่านไม้โกงกาง">
+    <div class="section-content">
+        <h2>🔥 ถ่านไม้โกงกาง</h2>
+        <p>⚡ ให้ความร้อนสูงและติดทนนาน เหมาะกับร้านอาหาร 🍴 ปิ้งย่าง 
+        ให้ไฟแรงและมีอายุการใช้งานที่ยาวนานกว่าถ่านทั่วไป</p>
+    </div>
+</section>
+
+<!-- Section 3 : เกษตร -->
+<section class="section">
+    <img src="{% static 'images/kase.jpg' %}" alt="ถ่านไม้เกษตร">
+    <div class="section-content">
+        <h2>🍃 ถ่านไม้เกษตร</h2>
+        <p>💰 ราคาประหยัด หาซื้อง่าย ใช้งานได้ทั่วไป 
+        เหมาะสำหรับการใช้งานทุกวันทั้งในครัวเรือน 🏡 และร้านค้าเล็กๆ</p>
+    </div>
+</section>
+
+<!-- Section 4 : มะขาม -->
+<section class="section">
+    <img src="{% static 'images/makam.jpg' %}" alt="ถ่านไม้มะขาม">
+    <div class="section-content">
+        <h2>🌳 ถ่านไม้มะขาม</h2>
+        <p>🔥 คุณภาพสูง ไฟแรง ติดทนนาน และให้ความร้อนสูง เหมาะสำหรับปิ้งย่าง 🍢🍖 
+        และใช้งานที่ต้องการไฟแรงและความร้อนต่อเนื่อง</p>
+    </div>
+</section>
+
+<script>
+    // ✅ ทำให้ Section โผล่มาเวลา scroll
+    const sections = document.querySelectorAll('.section');
+    const showOnScroll = () => {
+        const triggerBottom = window.innerHeight * 0.85;
+        sections.forEach(sec => {
+            const boxTop = sec.getBoundingClientRect().top;
+            if (boxTop < triggerBottom) sec.classList.add('show');
+        });
+    };
+    window.addEventListener('scroll', showOnScroll);
+    window.addEventListener('load', showOnScroll);
+
+    // ✅ สร้าง Particle Effect
+    const particlesContainer = document.getElementById("particles");
+    for (let i = 0; i < 30; i++) {
+        let particle = document.createElement("div");
+        particle.classList.add("particle");
+        particle.style.left = Math.random() * 100 + "vw";
+        particle.style.animationDuration = (5 + Math.random() * 10) + "s";
+        particle.style.width = particle.style.height = (3 + Math.random() * 6) + "px";
+        particlesContainer.appendChild(particle);
+    }
+</script>
+{% endblock %}
