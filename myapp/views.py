@@ -1263,7 +1263,13 @@ def shipping_rate_delete(request, pk):
     return redirect("myapp:shipping_rate_list")
 
 def checkout_view(request):
-    cart = request.session.get('cart', {})  # {product_id: qty}
+    # 🔐 เช็ค login ก่อน
+    if not request.user.is_authenticated and not request.session.get("customer_id"):
+        # จำหน้าที่กำลังจะไป
+        request.session["next_url"] = request.path
+        return redirect("myapp:login")
+
+    cart = request.session.get('cart', {})
 
     items = []
     total = 0
@@ -1278,12 +1284,12 @@ def checkout_view(request):
             'product': product,
             'qty': qty,
             'subtotal': subtotal,
+            'weight': weight,
         })
 
         total += subtotal
         total_weight += weight
 
-    # ตัวอย่างค่าส่ง (ใช้ของเดิมได้)
     shipping_fee = 25 if total_weight <= 1 else 350
     grand_total = total + shipping_fee
 
@@ -1295,4 +1301,5 @@ def checkout_view(request):
     }
 
     return render(request, 'checkout.html', context)
+
 
