@@ -3,6 +3,7 @@
 {% block title %}สินค้า - CHARCOAL HOME GREEN{% endblock %}
 
 {% block content %}
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <style>
     body {
         font-family: 'Kanit', sans-serif;
@@ -75,12 +76,15 @@
         font-weight: 600;
         border: none;
         cursor: pointer;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
     }
 
     .btn-buy {
         background: linear-gradient(135deg, #1f8f3a, #4caf50);
         color: #fff;
-        text-decoration: none;
     }
 
     .btn-cart {
@@ -93,17 +97,18 @@
 
     {% for p in uka_list %}
     <div class="product-card">
-        <img src="{% if p.image %}{{ p.image.url }}{% else %}{% static 'images/uka.jpg' %}{% endif %}">
+        <img src="{% if p.image %}{{ p.image.url }}{% else %}{% static 'images/uka.jpg' %}{% endif %}"
+            alt="{{ p.product_name }}">
         <div class="product-info">
             <h3>{{ p.product_name }}<br>({{ p.weight|floatformat:"-0" }} กิโลกรัม)</h3>
-            <p class="desc">จุดติดง่าย ไม่แตกประทุ เหมาะครัวเรือน</p>
             <div class="price">฿{{ p.price }}</div>
             <div class="btn-actions">
-                <a href="{% url 'myapp:add_to_cart' p.product_id %}?next=cart" class="btn-buy">
+                <button type="button" class="btn-buy" data-url="{% url 'myapp:add_to_cart' p.product_id %}"
+                    onclick="addToCart(this.dataset.url, true)">
                     🛒 ซื้อเลย
-                </a>
-                <button type="button" class="btn-cart"
-                    onclick="event.preventDefault(); event.stopPropagation(); addToCart('{{ p.product_id }}');">
+                </button>
+                <button type="button" class="btn-cart" data-url="{% url 'myapp:add_to_cart' p.product_id %}?next=cart"
+                    onclick="event.preventDefault(); event.stopPropagation(); addToCart(this.dataset.url);">
                     ➕ ตะกร้า
                 </button>
             </div>
@@ -113,18 +118,18 @@
 
     {% for p in koukang_list %}
     <div class="product-card">
-        <img src="{% if p.image %}{{ p.image.url }}{% else %}{% static 'images/koukan.jpeg' %}{% endif %}">
+        <img src="{% if p.image %}{{ p.image.url }}{% else %}{% static 'images/koukan.jpeg' %}{% endif %}"
+            alt="{{ p.product_name }}">
         <div class="product-info">
             <h3>{{ p.product_name }}<br>({{ p.weight|floatformat:"-0" }} กิโลกรัม)</h3>
-            <p class="desc">ไฟแรง ให้ความร้อนสูง เหมาะร้านอาหาร</p>
             <div class="price">฿{{ p.price }}</div>
             <div class="btn-actions">
-                <a href="{% url 'myapp:add_to_cart' p.product_id %}?next=cart" class="btn-buy">
+                <button type="button" class="btn-buy" data-url="{% url 'myapp:add_to_cart' p.product_id %}"
+                    onclick="addToCart(this.dataset.url, true)">
                     🛒 ซื้อเลย
-                </a>
-
-                <button type="button" class="btn-cart"
-                    onclick="event.preventDefault(); event.stopPropagation(); addToCart('{{ p.product_id }}');">
+                </button>
+                <button type="button" class="btn-cart" data-url="{% url 'myapp:add_to_cart' p.product_id %}?next=cart"
+                    onclick="event.preventDefault(); event.stopPropagation(); addToCart(this.dataset.url);">
                     ➕ ตะกร้า
                 </button>
             </div>
@@ -134,18 +139,18 @@
 
     {% for p in kaset_list %}
     <div class="product-card">
-        <img src="{% if p.image %}{{ p.image.url }}{% else %}{% static 'images/kase.jpg' %}{% endif %}">
+        <img src="{% if p.image %}{{ p.image.url }}{% else %}{% static 'images/kase.jpg' %}{% endif %}"
+            alt="{{ p.product_name }}">
         <div class="product-info">
             <h3>{{ p.product_name }}<br>({{ p.weight|floatformat:"-0" }} กิโลกรัม)</h3>
-            <p class="desc">ราคาประหยัด หาซื้อง่าย ใช้ได้ทั่วไป</p>
             <div class="price">฿{{ p.price }}</div>
             <div class="btn-actions">
-                <a href="{% url 'myapp:add_to_cart' p.product_id %}?next=cart" class="btn-buy">
+                <button type="button" class="btn-buy" data-url="{% url 'myapp:add_to_cart' p.product_id %}"
+                    onclick="addToCart(this.dataset.url, true)">
                     🛒 ซื้อเลย
-                </a>
-
-                <button type="button" class="btn-cart"
-                    onclick="event.preventDefault(); event.stopPropagation(); addToCart('{{ p.product_id }}');">
+                </button>
+                <button type="button" class="btn-cart" data-url="{% url 'myapp:add_to_cart' p.product_id %}?next=cart"
+                    onclick="event.preventDefault(); event.stopPropagation(); addToCart(this.dataset.url);">
                     ➕ ตะกร้า
                 </button>
             </div>
@@ -155,18 +160,18 @@
 
     {% for p in makam_list %}
     <div class="product-card">
-        <img src="{% if p.image %}{{ p.image.url }}{% else %}{% static 'images/makam.jpg' %}{% endif %}">
+        <img src="{% if p.image %}{{ p.image.url }}{% else %}{% static 'images/makam.jpg' %}{% endif %}"
+            alt="{{ p.product_name }}">
         <div class="product-info">
             <h3>{{ p.product_name }}<br>({{ p.weight|floatformat:"-0" }} กิโลกรัม)</h3>
-            <p class="desc">ไฟแรง ติดทนนาน เหมาะปิ้งย่าง</p>
             <div class="price">฿{{ p.price }}</div>
             <div class="btn-actions">
-                <a href="{% url 'myapp:add_to_cart' p.product_id %}?next=cart" class="btn-buy">
+                <button type="button" class="btn-buy" data-url="{% url 'myapp:add_to_cart' p.product_id %}"
+                    onclick="addToCart(this.dataset.url, true)">
                     🛒 ซื้อเลย
-                </a>
-
-                <button type="button" class="btn-cart"
-                    onclick="event.preventDefault(); event.stopPropagation(); addToCart('{{ p.product_id }}');">
+                </button>
+                <button type="button" class="btn-cart" data-url="{% url 'myapp:add_to_cart' p.product_id %}?next=cart"
+                    onclick="event.preventDefault(); event.stopPropagation(); addToCart(this.dataset.url);">
                     ➕ ตะกร้า
                 </button>
             </div>
@@ -175,4 +180,136 @@
     {% endfor %}
 
 </div>
+
+<!-- JavaScript: CSRF helper + addToCart AJAX -->
+<script>
+// ----------------------
+// 🔐 CSRF TOKEN
+// ----------------------
+function getCookie(name) {
+    const match = document.cookie.match('(^|;)\\s*' + name + '\\s*=\\s*([^;]+)');
+    return match ? decodeURIComponent(match.pop()) : '';
+}
+
+
+// ----------------------
+// 🔥 UPDATE CART UI
+// ----------------------
+function updateCartCount(count) {
+    const badge = document.getElementById("cart-count");
+    if (!badge) return;
+
+    badge.innerText = count;
+
+    // animation เด้ง
+    badge.classList.add("cart-bounce");
+    setTimeout(() => {
+        badge.classList.remove("cart-bounce");
+    }, 400);
+}
+
+
+// ----------------------
+// 🛒 ADD TO CART (AJAX)
+// ----------------------
+async function addToCart(url, goToCart = false) {
+    try {
+        const csrftoken = getCookie('csrftoken');
+
+        const res = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrftoken,
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: JSON.stringify({ quantity: 1 })
+        });
+
+        // 🔥 กัน error response ไม่ใช่ JSON
+        let data = {};
+        try {
+            data = await res.json();
+        } catch (e) {}
+
+        if (res.ok) {
+
+            // 🔥 อัปเดตตัวเลข
+            if (data.total_items !== undefined) {
+                updateCartCount(data.total_items);
+            }
+
+            Swal.fire({
+                icon: 'success',
+                title: 'เพิ่มแล้ว 🛒',
+                text: 'สินค้าอยู่ในตะกร้าแล้ว',
+                timer: 900,
+                showConfirmButton: false
+            });
+
+            // 👉 ซื้อเลย → ไป cart
+            if (goToCart) {
+                setTimeout(() => {
+                    window.location.href = "/cart/";
+                }, 800);
+            }
+
+        } else {
+            Swal.fire({
+                icon: 'error',
+                title: 'เพิ่มไม่สำเร็จ',
+                text: 'เกิดข้อผิดพลาด'
+            });
+        }
+
+    } catch (err) {
+        console.error("Add to cart error:", err);
+
+        Swal.fire({
+            icon: 'error',
+            title: 'ระบบล่ม 😅',
+            text: 'ลองใหม่อีกครั้ง'
+        });
+    }
+}
+
+
+// ----------------------
+// 🔄 LOAD CART ตอนเข้า page
+// ----------------------
+async function loadCartOnPage() {
+    try {
+        const res = await fetch("/cart/", {
+            headers: {
+                "X-Requested-With": "XMLHttpRequest"
+            }
+        });
+
+        if (!res.ok) return;
+
+        const data = await res.json();
+
+        let total = 0;
+
+        if (data.items) {
+            data.items.forEach(item => {
+                total += item.qty;
+            });
+        }
+
+        updateCartCount(total);
+
+    } catch (err) {
+        console.log("โหลด cart ไม่สำเร็จ");
+    }
+}
+
+
+// ----------------------
+// 🚀 INIT
+// ----------------------
+document.addEventListener("DOMContentLoaded", () => {
+    loadCartOnPage();
+});
+</script>
 {% endblock %}

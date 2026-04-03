@@ -5,261 +5,609 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="csrf-token" content="{{ csrf_token }}">
   <title>{% block title %}CHARCOAL HOME GREEN{% endblock %}</title>
 
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
-    crossorigin="anonymous" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet" />
 
+  <link rel="stylesheet" href="{% static 'css/cart.css' %}" />
   <link rel="stylesheet" href="{% static 'css/main.css' %}" />
+  <link rel="stylesheet" href="{% static 'css/form.css' %}" />
+  <link rel="stylesheet" href="{% static 'css/table.css' %}" />
+  <link rel="stylesheet" href="{% static 'css/button.css' %}" />
   <link rel="stylesheet" href="{% static 'css/layout.css' %}" />
-  <link rel="stylesheet" href="{% static 'css/cart.css' %}">
+  <link rel="stylesheet" href="{% static 'css/page_add.css' %}" />
+  <link rel="stylesheet" href="{% static 'css/product_receive.css' %}" />
+
+  {% block extra_css %}{% endblock %}
 
   <style>
-    /* ===== Main Layout & Header ===== */
-    .header-main {
+    :root {
+      --sidebar-width: 260px;
+      --primary-brown: #5a3e2b;
+      --sidebar-bg: #2c3e50;
+      --submenu-bg: #1a252f;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Sarabun', sans-serif;
+      background-color: #f4f7f6;
+    }
+
+    /* จัดการเลย์เอาต์เมื่อมี Sidebar */
+    body.has-sidebar .main-content {
+      margin-left: var(--sidebar-width);
+    }
+
+    /* --- Sidebar Style --- */
+    .sidebar {
+      width: var(--sidebar-width);
+      height: 100vh;
+      background: var(--sidebar-bg);
+      color: white;
+      position: fixed;
+      left: 0;
+      top: 0;
+      overflow-y: auto;
+      z-index: 1000;
+      box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+    }
+
+    .sidebar h2 {
+      padding: 25px 20px;
+      font-size: 1.2rem;
+      background: rgba(0, 0, 0, 0.3);
+      margin: 0;
+      text-align: center;
+      color: #fff;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .sidebar-group {
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .group-header {
+      padding: 15px 20px;
+      cursor: pointer;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 15px 40px;
-      background: #ffffff;
-      border-bottom: 1px solid #ddd;
-      position: sticky;
-      top: 0;
-      z-index: 1000;
-      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+      transition: background 0.3s;
     }
 
-    .header-left {
+    .group-header:hover {
+      background: #34495e;
+    }
+
+    .submenu {
+      background: var(--submenu-bg);
+      display: none;
+      /* ปิดไว้เริ่มต้น */
+    }
+
+    .sidebar-group.open .submenu {
+      display: block;
+    }
+
+    .sidebar-group.open .caret {
+      transform: rotate(90deg);
+    }
+
+    .caret {
+      transition: 0.3s;
+      display: inline-block;
+      font-size: 12px;
+    }
+
+    .sidebar a {
+      display: block;
+      padding: 12px 25px;
+      color: #bdc3c7;
+      text-decoration: none;
+      transition: 0.3s;
+      font-size: 0.95rem;
+    }
+
+    .sidebar a:hover {
+      color: white;
+      background: #3498db;
+      padding-left: 30px;
+    }
+
+    /* --- Header Style --- */
+    .main-header {
       display: flex;
       align-items: center;
-      flex: 1;
+      justify-content: space-between;
+      padding: 0 30px;
+      height: 70px;
+      border-bottom: 1px solid #ddd;
+      background: white;
+      position: sticky;
+      top: 0;
+      z-index: 900;
+    }
+
+    .logo-section {
+      display: flex;
+      align-items: center;
+      gap: 12px;
     }
 
     .logo-img {
-      height: 65px;
-      /* ปรับขนาดโลโก้ให้เด่นตามภาพ */
-      width: auto;
-      margin-right: 18px;
+      width: 50px;
+      height: auto;
     }
 
-    /* ชื่อแบรนด์ - ปรับให้กว้างและสีทองตามภาพ */
-    .brand {
-      font-size: 24px;
-      font-weight: bold;
-      color: #a89951;
-      white-space: nowrap;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    }
-
-    /* สโลแกน - ตัวเล็กด้านล่าง */
-    .slogan {
-      font-size: 14px;
-      color: #777;
-    }
-
-    /* ===== Navigation & Menu ===== */
-    .header-center {
-      flex: 2;
+    .nav-section {
       display: flex;
-      justify-content: center;
-    }
-
-    .menu {
-      display: flex;
-      gap: 35px;
-    }
-
-    .menu a {
-      text-decoration: none;
-      color: #333;
-      font-weight: 600;
-      font-size: 16px;
-      transition: 0.3s;
-    }
-
-    .menu a:hover {
-      color: #b3a25d;
-    }
-
-    /* ===== Right Side (Cart, User, Login) ===== */
-    .header-right {
-      flex: 1;
-      display: flex;
-      justify-content: flex-end;
-      align-items: center;
       gap: 25px;
     }
 
-    .cart-link {
-      position: relative;
-      font-size: 24px;
-      color: #333;
+    .nav-section a {
+      text-decoration: none;
+      color: var(--primary-brown);
+      font-weight: 600;
+      font-size: 1rem;
     }
 
-    .cart-count {
+    .nav-section a:hover {
+      color: #8d6e63;
+    }
+
+    .right-section {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    /* Cart & User */
+    .cart-wrapper {
+      position: relative;
+    }
+
+    .cart-link {
+      font-size: 24px;
+      color: var(--primary-brown);
+      text-decoration: none;
+    }
+
+    .cart-badge {
       position: absolute;
       top: -5px;
-      right: -10px;
-      background: #ff4d4d;
+      right: -8px;
+      background: #ff3b3b;
       color: white;
       font-size: 11px;
       padding: 2px 6px;
       border-radius: 10px;
-    }
-
-    .login-btn {
-      padding: 8px 22px;
-      border: 2px solid #333;
-      background: transparent;
       font-weight: bold;
-      border-radius: 6px;
-      cursor: pointer;
-      transition: 0.3s;
     }
 
-    .login-btn:hover {
-      background: #333;
-      color: #fff;
-    }
-
-    /* ===== Other Elements ===== */
     .user-menu {
+      position: relative;
       display: flex;
       align-items: center;
       gap: 10px;
       cursor: pointer;
-      font-weight: 600;
     }
 
     .user-icon {
       width: 35px;
       height: 35px;
       border-radius: 50%;
+      object-fit: cover;
       border: 1px solid #ddd;
     }
 
+    .dropdown {
+      position: absolute;
+      top: 50px;
+      right: 0;
+      background: white;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      display: none;
+      min-width: 180px;
+      z-index: 1100;
+      box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .dropdown a {
+      display: block;
+      padding: 12px 15px;
+      text-decoration: none;
+      color: #333;
+      border-bottom: 1px solid #eee;
+    }
+
+    .dropdown a:last-child {
+      border-bottom: none;
+    }
+
+    .dropdown a:hover {
+      background: #f8f9fa;
+      color: #d32f2f;
+    }
+
+    .cart-bounce {
+      animation: bounce 0.4s ease;
+    }
+
+    @keyframes bounce {
+
+      0%,
+      100% {
+        transform: scale(1);
+      }
+
+      50% {
+        transform: scale(1.4);
+      }
+    }
+
     footer {
-      background: #5f7d7d;
-      color: white;
-      padding: 50px 40px;
+      padding: 40px 20px;
+      background: #fff;
       display: flex;
       justify-content: space-around;
+      border-top: 1px solid #eee;
       margin-top: 60px;
+      color: #666;
     }
   </style>
-  {% block extra_css %}{% endblock %}
 </head>
 
-<body {% if show_sidebar %} class="has-sidebar" {% endif %}>
+{% comment %}
+จัดการ Class has-sidebar ให้ครอบคลุมทุกสิทธิ์ที่ต้องเห็น Sidebar
+{% endcomment %}
 
-  {% if show_sidebar %}
+<body
+  class="{% if user.is_authenticated %}{% if user.is_superuser or user.profile.position == 'supper' or user.profile.position == 'owner' or user.is_staff or user.profile.position == 'employee' %}has-sidebar{% endif %}{% endif %}">
+  {% if user.is_authenticated %}
+
+  {% comment %} ✅ ADMIN / OWNER เห็นทั้งหมด {% endcomment %}
+  {% if user.is_superuser or user.profile.position == 'supper' or user.profile.position == 'owner' %}
+
   <div class="sidebar">
-    <h2 style="padding: 20px;">Dashboard</h2>
-    <div class="sidebar-item"><a href="{% url 'myapp:product_list' %}"
-        style="color:white; text-decoration:none;">จัดการสินค้า</a></div>
+    <h2><i class="bi bi-shield-lock"></i> แผงควบคุมหลัก</h2>
+
+    <div class="sidebar-group" id="basicMasterGroup">
+      <div class="group-header" onclick="toggleGroup('basicMasterGroup')">
+        <div class="group-title"><i class="bi bi-gear-fill"></i> จัดการข้อมูลพื้นฐาน</div>
+        <span class="caret">▶</span>
+      </div>
+      <div class="submenu">
+        <a href="{% url 'myapp:store_list' %}"><i class="bi bi-shop"></i> ข้อมูลร้าน</a>
+        <a href="{% url 'myapp:product_list' %}"><i class="bi bi-box-seam"></i> ข้อมูลสินค้า</a>
+        <a href="{% url 'myapp:user_list' %}"><i class="bi bi-people"></i> ข้อมูลผู้ใช้ระบบ</a>
+        <a href="{% url 'myapp:shipping_rate_list' %}"><i class="bi bi-truck"></i> อัตราค่าขนส่ง</a>
+      </div>
+    </div>
+    <div class="sidebar-group" id="dashboardGroup">
+  <div class="group-header" onclick="toggleGroup('dashboardGroup')">
+    <div class="group-title">
+      <i class="bi bi-speedometer2"></i> Dashboard
+    </div>
+    <span class="caret">▶</span>
   </div>
+
+  <div class="submenu">
+    <a href="{% url 'myapp:dashboard' %}">
+      <i class="bi bi-bar-chart-line"></i> ภาพรวมระบบ
+    </a>
+
+    <a href="{% url 'myapp:sale_list' %}">
+      <i class="bi bi-cart-check"></i> รายงานการขาย
+    </a>
+
+    <a href="{% url 'myapp:delivery_list' %}">
+      <i class="bi bi-truck"></i> รายงานจัดส่ง
+    </a>
+
+    <a href="{% url 'myapp:product_list' %}">
+      <i class="bi bi-box-seam"></i> สินค้า
+    </a>
+
+    <a href="{% url 'myapp:user_list' %}">
+      <i class="bi bi-people"></i> ลูกค้า
+    </a>
+  </div>
+</div>
+    <!-- 🔥 เพิ่มใน ADMIN ใต้ saleProductGroup -->
+    <div class="sidebar-group" id="deliveryGroup">
+      <div class="group-header" onclick="toggleGroup('deliveryGroup')">
+        <div class="group-title">
+          <i class="bi bi-truck"></i> จัดส่งสินค้า 
+        </div>
+        <span class="caret">▶</span>
+      </div>
+
+      <div class="submenu">
+        <a href="{% url 'myapp:delivery_list' %}">
+          <i class="bi bi-list"></i> รายการจัดส่งสินค้า
+        </a>
+
+        <a href="{% url 'myapp:delivery_create' %}">
+          <i class="bi bi-plus-circle"></i> สร้างการจัดส่ง
+        </a>
+
+        <a href="{% url 'myapp:delivery_tracking' %}">
+          <i class="bi bi-geo-alt"></i> ติดตามสถานะ
+        </a>
+      </div>
+    </div>
+    <div class="sidebar-group" id="saleProductGroup">
+      <div class="group-header" onclick="toggleGroup('saleProductGroup')">
+        <div class="group-title"><i class="bi bi-graph-up-arrow"></i> รายงานการขาย</div>
+        <span class="caret">▶</span>
+      </div>
+      <div class="submenu">
+        <a href="{% url 'myapp:sale_list' %}"><i class="bi bi-list-check"></i> ข้อมูลการขายสินค้า</a>
+      </div>
+    </div>
+
+    <a href="{% url 'myapp:home' %}"><i class="bi bi-house-door"></i> กลับหน้าหลักร้านค้า</a>
+  </div>
+
+  {% comment %} ✅ EMPLOYEE {% endcomment %}
+  {% elif user.is_staff or user.profile.position == 'employee' %}
+
+  <div class="sidebar">
+    <h2><i class="bi bi-person-badge"></i> เมนูพนักงาน</h2>
+    <a href="{% url 'myapp:product_list' %}"><i class="bi bi-box-seam"></i> ตรวจสอบสต็อกสินค้า</a>
+    <a href="{% url 'myapp:sale_list' %}"><i class="bi bi-cart-plus"></i> บันทึกการขายใหม่</a>
+    <a href="{% url 'myapp:home' %}"><i class="bi bi-house-door"></i> หน้าหลัก</a>
+  </div>
+
+  {% endif %}
+
   {% endif %}
 
   <div class="main-content">
-    <header class="header-main">
-      <div class="header-left">
-        <a href="{% url 'myapp:home' %}" style="display: flex; align-items: center; text-decoration: none;">
-          <img src="{% static 'images/logo.gif' %}" alt="โลโก้" class="logo-img">
-          <div style="display: flex; flex-direction: column;">
-            <div class="brand">CHARCOAL HOME GREEN</div>
-            <div class="slogan">ถ่านบ้านเขียว</div>
-          </div>
-        </a>
+
+    <header class="main-header">
+      <div class="logo-section">
+        <img src="{% static 'images/logo.gif' %}" class="logo-img" alt="Logo">
+        <div style="font-weight: 700; color: #5a3e2b; font-size: 1.1rem; letter-spacing: 1px;">CHARCOAL HOME GREEN</div>
       </div>
 
-      <nav class="header-center">
-        <div class="menu">
-          <a href="{% url 'myapp:home' %}">หน้าแรก</a>
-          <a href="{% url 'myapp:products' %}">สินค้า</a>
-        </div>
+      <nav class="nav-section">
+        <a href="{% url 'myapp:home' %}">หน้าแรก</a>
+        <a href="{% url 'myapp:products' %}">สินค้าทั้งหมด</a>
       </nav>
 
-      <div class="header-right">
-        <a href="{% url 'myapp:cart' %}" class="cart-link">
-          <i class="fa-solid fa-cart-shopping"></i>
-          <span class="cart-count" id="cartCount" {% if not cart_count %}style="display:none;" {% endif %}>
-            {{ cart_count|default:0 }}
-          </span>
-        </a>
+      <div class="right-section">
+        <div class="cart-wrapper">
+          <a href="{% url 'myapp:cart' %}" class="cart-link">
+            <i class="bi bi-cart3"></i>
+            <span id="cart-count" class="cart-badge">0</span>
+          </a>
+        </div>
 
-        {% if user.is_authenticated or request.session.customer_name %}
+        {% if user.is_authenticated %}
         <div class="user-menu" onclick="toggleDropdown()">
-          <span>👤 {{ user.username|default:request.session.customer_name }}</span>
-          <img src="{% static 'images/user-icon.png' %}" alt="User" class="user-icon" />
-
+          <span style="color: #5a3e2b; font-weight: 500;">👤 {{ user.username }}
+            <small style="opacity: 0.7;">({{ user.profile.position|default:"Staff" }})</small>
+          </span>
+          <img src="{% static 'images/user-icon.png' %}" class="user-icon" alt="User" />
           <div class="dropdown" id="dropdownMenu">
-            {% if user.is_authenticated %}
-            <a href="#" onclick="event.preventDefault(); document.getElementById('logoutForm').submit();">🚪
-              ออกจากระบบ</a>
-            {% else %}
-            <a href="{% url 'myapp:logout' %}">🚪 ออกจากระบบ</a>
-            {% endif %}
+            <a href="#" onclick="event.preventDefault(); document.getElementById('logoutForm').submit();">
+              <i class="bi bi-box-arrow-right"></i> ออกจากระบบ
+            </a>
           </div>
         </div>
-        <form id="logoutForm" method="POST" action="{% url 'myapp:logout' %}" style="display: none">
+        <form id="logoutForm" method="POST" action="{% url 'myapp:logout' %}" style="display:none;">
           {% csrf_token %}
         </form>
+
+        {% elif request.session.customer_name %}
+        <div class="user-menu" onclick="toggleDropdown()">
+          <span>👤 {{ request.session.customer_name }}</span>
+          <img src="{% static 'images/user-icon.png' %}" class="user-icon" alt="User" />
+          <div class="dropdown" id="dropdownMenu">
+            <a href="{% url 'myapp:logout' %}">🚪 ออกจากระบบ</a>
+          </div>
+        </div>
+
         {% else %}
-        <a href="{% url 'myapp:login' %}"><button class="login-btn">Login</button></a>
+        <a href="{% url 'myapp:login' %}" class="login-btn"
+          style="border: 1px solid var(--primary-brown); padding: 5px 15px; border-radius: 20px; color: var(--primary-brown); text-decoration: none; font-weight: 600;">Login</a>
         {% endif %}
       </div>
     </header>
 
-    <main style="padding: 20px;">
+    <main class="container-center" style="min-height: 80vh; padding: 30px;">
       {% block content %}{% endblock %}
     </main>
 
     <footer>
-      <div style="max-width: 400px;">
-        <strong>About Us</strong><br><br>
-        CHARCOAL HOME GREEN<br>
-        จำหน่ายถ่านไม้คุณภาพจากธรรมชาติ ผลิตและจำหน่ายถ่าน ขายส่งถ่าน ถ่านไม้
-        ปลีกและส่ง พร้อมส่งตรงถึงผู้บริโภค
-      </div>
-      <div>
-        <strong>Contact</strong><br><br>
-        ที่อยู่: 285 หมู่11 ต.โนนท่อน อ.เมือง จ.ขอนแก่น 40000<br>
-        โทร: 093-567-2864<br>
-        Email: charcoalhomegreen@gmail.com
-      </div>
+      <div><strong>ABOUT US</strong><br><small>CHARCOAL HOME GREEN OFFICIAL</small></div>
+      <div><strong>CONTACT</strong><br><small><i class="bi bi-telephone"></i> 093-567-2864</small></div>
+      <div><strong>HOURS</strong><br><small>Open Daily: 08:00 - 18:00</small></div>
     </footer>
+
   </div>
 
   <script>
+    // =============================
+    // 🔧 UI: dropdown / sidebar
+    // =============================
     function toggleDropdown() {
       const menu = document.getElementById("dropdownMenu");
       menu.style.display = (menu.style.display === "block") ? "none" : "block";
     }
 
-    // ปิด dropdown เมื่อคลิกที่อื่น
-    window.onclick = function (event) {
-      if (!event.target.closest('.user-menu')) {
-        const dropdowns = document.getElementsByClassName("dropdown");
-        for (let i = 0; i < dropdowns.length; i++) {
-          dropdowns[i].style.display = "none";
-        }
+    function toggleGroup(id) {
+      const el = document.getElementById(id);
+      if (el) el.classList.toggle("open");
+    }
+
+    window.addEventListener('click', function (e) {
+      const menu = document.querySelector('.user-menu');
+      if (menu && !menu.contains(e.target)) {
+        const dd = document.getElementById("dropdownMenu");
+        if (dd) dd.style.display = "none";
+      }
+    });
+
+
+    // =============================
+    // 🔥 CART STATE (Global)
+    // =============================
+    let CART_STATE = {
+      total_items: 0,
+      last_sync: 0
+    };
+
+
+    // =============================
+    // 🔥 UPDATE CART BADGE
+    // =============================
+    function updateCartCount(count) {
+      const badge = document.getElementById("cart-count");
+      if (!badge) return;
+
+      // กันกระพริบถ้าค่าเท่าเดิม
+      if (Number(badge.innerText) === Number(count)) return;
+
+      badge.innerText = count;
+
+      // animation เด้ง
+      badge.classList.add("cart-bounce");
+      setTimeout(() => {
+        badge.classList.remove("cart-bounce");
+      }, 400);
+    }
+
+
+    // =============================
+    // 🔥 FETCH CART FROM SERVER
+    // =============================
+    async function fetchCart() {
+      try {
+        const res = await fetch("/cart/", {
+          headers: {
+            "X-Requested-With": "XMLHttpRequest"
+          }
+        });
+
+        if (!res.ok) return null;
+
+        const data = await res.json();
+        return data;
+
+      } catch (err) {
+        console.warn("Fetch cart error:", err);
+        return null;
       }
     }
 
-    // Ajax Add to Cart (ตัวอย่าง)
-    function addToCart(productId) {
-      fetch(`/cart/add/${productId}/?ajax=1`)
-        .then(res => res.json())
-        .then(data => {
-          const badge = document.getElementById('cartCount');
-          if (badge) {
-            badge.innerText = data.total_items;
-            badge.style.display = 'inline-block';
-          }
-        });
+
+    // =============================
+    // 🔥 SYNC CART (ใช้ทุกหน้า)
+    // =============================
+    async function syncCartRealtime(force = false) {
+      const now = Date.now();
+
+      // กันยิงถี่เกิน (cache 2 วิ)
+      if (!force && now - CART_STATE.last_sync < 2000) return;
+
+      const data = await fetchCart();
+      if (!data) return;
+
+      CART_STATE.total_items = data.total_items || 0;
+      CART_STATE.last_sync = now;
+
+      updateCartCount(CART_STATE.total_items);
     }
+
+
+    // =============================
+    // 🛒 ADD TO CART (GLOBAL)
+    // =============================
+    async function addToCart(url, goToCart = false) {
+      try {
+        const csrftoken = getCookie('csrftoken');
+
+        const res = await fetch(url, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrftoken,
+            'X-Requested-With': 'XMLHttpRequest'
+          },
+          body: JSON.stringify({ quantity: 1 })
+        });
+
+        let data = {};
+        try { data = await res.json(); } catch (e) { }
+
+        if (res.ok) {
+
+          const newCount = data.total_items ?? CART_STATE.total_items;
+
+          CART_STATE.total_items = newCount;
+          updateCartCount(newCount);
+
+          Swal.fire({
+            icon: 'success',
+            title: 'เพิ่มแล้ว 🛒',
+            text: 'สินค้าอยู่ในตะกร้าแล้ว',
+            timer: 900,
+            showConfirmButton: false
+          });
+
+          if (goToCart) {
+            setTimeout(() => {
+              window.location.href = "/cart/";
+            }, 800);
+          }
+
+        } else {
+          Swal.fire({
+            icon: 'error',
+            title: 'เพิ่มไม่สำเร็จ'
+          });
+        }
+
+      } catch (err) {
+        console.error("Add cart error:", err);
+
+        Swal.fire({
+          icon: 'error',
+          title: 'ระบบมีปัญหา 😅'
+        });
+      }
+    }
+
+
+    // =============================
+    // 🔐 CSRF HELPER
+    // =============================
+    function getCookie(name) {
+      const match = document.cookie.match('(^|;)\\s*' + name + '\\s*=\\s*([^;]+)');
+      return match ? decodeURIComponent(match.pop()) : '';
+    }
+
+
+    // =============================
+    // 🚀 INIT
+    // =============================
+    document.addEventListener("DOMContentLoaded", () => {
+
+      // โหลดทันที
+      syncCartRealtime(true);
+
+      // sync ทุก 3 วิ (real-time)
+      setInterval(() => {
+        syncCartRealtime();
+      }, 3000);
+
+    });
   </script>
+
 </body>
 
 </html>

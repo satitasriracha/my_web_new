@@ -424,7 +424,6 @@ class DeliveryForm(forms.ModelForm):
             "company": "บริษัทขนส่ง",
         }
 
-
 class StoreForm(forms.ModelForm):
     bank_name = forms.CharField(label="ธนาคาร", required=False)
     bank_number = forms.CharField(label="เลขบัญชี", required=False)

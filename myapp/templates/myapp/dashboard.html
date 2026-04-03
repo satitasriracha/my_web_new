@@ -1,0 +1,413 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+  .dashboard {
+    max-width: 1300px;
+    margin: auto;
+    font-family: 'Segoe UI', sans-serif;
+  }
+
+  /* 🔥 CARDS */
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 18px;
+    margin-bottom: 25px;
+  }
+
+  .card {
+    background: linear-gradient(135deg, #ffffff, #eef2ff);
+    padding: 18px;
+    border-radius: 16px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+    transition: .3s;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .card:hover {
+    transform: translateY(-8px) scale(1.02);
+  }
+
+  .card::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 5px;
+    background: linear-gradient(90deg, #ff9a9e, #fad0c4);
+  }
+
+  .card h3 {
+    margin: 10px 0 0;
+    font-size: 24px;
+  }
+
+  /* 🔥 GRID */
+  .grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 20px;
+  }
+
+  /* 🔥 BOX */
+  .box {
+    background: white;
+    padding: 20px;
+    border-radius: 16px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+    margin-bottom: 20px;
+  }
+
+  /* 🔥 STATUS */
+  .status p {
+    margin: 8px 0;
+    font-size: 15px;
+  }
+
+  /* 🔥 TABLE */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  th {
+    background: #f5f6fa;
+    padding: 10px;
+  }
+
+  td {
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+  }
+
+  tr:hover {
+    background: #fafafa;
+  }
+
+  /* 🔥 BADGE */
+  .badge {
+    padding: 6px 12px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: bold;
+  }
+
+  .s1 {
+    background: #bdc3c7;
+  }
+
+  .s2 {
+    background: #f1c40f;
+  }
+
+  .s3 {
+    background: #3498db;
+  }
+
+  .s4 {
+    background: #2ecc71;
+  }
+
+  /* 🔥 MODAL */
+  .modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 999;
+  }
+
+  .modal-content {
+    background: white;
+    width: 90%;
+    max-width: 900px;
+    padding: 25px;
+    border-radius: 16px;
+    animation: fadeIn .3s ease;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .close {
+    float: right;
+    font-size: 22px;
+    cursor: pointer;
+  }
+</style>
+
+<div class="dashboard">
+
+  <h2>📊 Dashboard ระบบ</h2>
+
+  <div class="cards">
+
+    <div class="card" onclick="openModal('orders')">
+      🧾 Orders <h3>{{ total_sales }}</h3>
+    </div>
+
+    <div class="card" onclick="openModal('products')">
+      📦 Products <h3>{{ total_products }}</h3>
+    </div>
+
+    <div class="card" onclick="openModal('customers')">
+      👤 Customers <h3>{{ total_customers }}</h3>
+    </div>
+
+    <div class="card" onclick="openModal('delivery')">
+      🚚 Delivery <h3>{{ total_delivery }}</h3>
+    </div>
+
+    <div class="card" onclick="openModal('payment')">
+      💰 Payment <h3>{{ total_payment }}</h3>
+    </div>
+
+    <div class="card" onclick="openModal('revenue')">
+      💵 Revenue <h3>฿{{ revenue }}</h3>
+    </div>
+
+  </div>
+
+  <div class="grid">
+
+    <div class="box">
+      <h4>📈 ยอดขายรายวัน</h4>
+      <canvas id="chart"></canvas>
+    </div>
+
+    <div class="box status">
+      <h4>📦 สถานะ</h4>
+      <p>📌 รอดำเนินการ: {{ pending }}</p>
+      <p>⏳ รอจัดส่ง: {{ waiting }}</p>
+      <p>🚚 กำลังจัดส่ง: {{ shipping }}</p>
+      <p>✅ สำเร็จ: {{ success }}</p>
+    </div>
+
+  </div>
+
+  <div class="box">
+    <h4>🔥 สินค้าขายดี</h4>
+    <table>
+      <tr>
+        <th>สินค้า</th>
+        <th>จำนวน</th>
+      </tr>
+
+      {% for p in top_products %}
+      <tr>
+        <td>{{ p.product__product_name }}</td>
+        <td>{{ p.total }}</td>
+      </tr>
+      {% endfor %}
+
+    </table>
+  </div>
+
+  <div class="box">
+    <h4>🧾 รายการล่าสุด</h4>
+    <table>
+      <tr>
+        <th>ID</th>
+        <th>ลูกค้า</th>
+        <th>สถานะ</th>
+      </tr>
+
+      {% for s in recent_sales %}
+      <tr>
+        <td>#{{ s.id }}</td>
+        <td>{{ s.customer.name }}</td>
+        <td>
+          <span class="badge s{{ s.status }}">
+            {{ s.get_status_display }}
+          </span>
+        </td>
+      </tr>
+      {% endfor %}
+
+    </table>
+  </div>
+
+</div>
+
+<!-- 🔥 MODAL -->
+<div id="modal" class="modal">
+  <div class="modal-content">
+    <span class="close" onclick="closeModal()">✖</span>
+    <h3 id="modal-title"></h3>
+    <div id="modal-body"></div>
+  </div>
+</div>
+
+<script>
+  function openModal(type) {
+    let title = '';
+    let body = '';
+
+    if (type === 'orders') {
+      title = '🧾 Orders ทั้งหมด';
+      body = `
+  <table>
+   <tr><th>ID</th><th>ลูกค้า</th><th>สถานะ</th></tr>
+   {% for s in recent_sales %}
+   <tr>
+    <td>#{{ s.id }}</td>
+    <td>{{ s.customer.name }}</td>
+    <td>{{ s.get_status_display }}</td>
+   </tr>
+   {% endfor %}
+  </table>`;
+    }
+
+    if (type === 'products') {
+      title = '📦 สินค้าขายดี';
+      body = `
+  <table>
+   <tr><th>สินค้า</th><th>จำนวน</th></tr>
+   {% for p in top_products %}
+   <tr>
+    <td>{{ p.product__product_name }}</td>
+    <td>{{ p.total }}</td>
+   </tr>
+   {% endfor %}
+  </table>`;
+    }
+
+    if (type === 'customers') {
+      title = '👤 รายชื่อลูกค้า';
+      body = `
+  <table>
+    <tr>
+      <th>ID</th>
+      <th>ชื่อ</th>
+      <th>Email</th>
+      <th>Phone</th>
+    </tr>
+    {% for c in customers %}
+    <tr>
+      <td>#{{ c.id }}</td>
+      <td>{{ c.name }}</td>
+      <td>{{ c.email }}</td>
+      <td>{{ c.phone }}</td>
+    </tr>
+    {% endfor %}
+  </table>`;
+    }
+
+    if (type === 'delivery') {
+      title = '🚚 การจัดส่ง';
+      body = `
+  <table>
+    <tr>
+      <th>ID</th>
+      <th>ลูกค้า</th>
+      <th>สถานะ</th>
+      <th>ที่อยู่</th>
+    </tr>
+    {% for d in deliveries %}
+    <tr>
+      <td>#{{ d.delivery_id }}</td>
+      <td>{{ d.sale.customer.name }}</td>
+      <td>{{ d.status }}</td>
+      <td>{{ d.address }}</td>
+    </tr>
+    {% endfor %}
+  </table>`;
+    }
+
+    if (type === 'payment') {
+      title = '💰 การชำระเงิน';
+      body = `
+  <table>
+    <tr>
+      <th>ID</th>
+      <th>ลูกค้า</th>
+      <th>ยอดเงิน</th>
+      <th>วันที่</th>
+    </tr>
+    {% for p in payments %}
+    <tr>
+      <td>#{{ p.id }}</td>
+      <td>{{ p.sale.customer.name }}</td>
+      <td>฿{{ p.pay_total }}</td>
+     <td>{{ p.date }}</td>
+    </tr>
+    {% endfor %}
+  </table>`;
+    }
+
+    if (type === 'revenue') {
+      title = '💵 รายได้ทั้งหมด';
+      body = `
+  <h2>รวม: ฿{{ revenue }}</h2>
+  <table>
+    <tr>
+      <th>ลูกค้า</th>
+      <th>ยอดเงิน</th>
+    </tr>
+    {% for p in payments %}
+    <tr>
+      <td>{{ p.sale.customer.name }}</td>
+      <td>฿{{ p.pay_total }}</td>
+    </tr>
+    {% endfor %}
+  </table>`;
+    }
+
+    document.getElementById('modal-title').innerHTML = title;
+    document.getElementById('modal-body').innerHTML = body;
+    document.getElementById('modal').style.display = 'flex';
+  }
+
+  function closeModal() {
+    document.getElementById('modal').style.display = 'none';
+  }
+
+  window.onclick = function (e) {
+    if (e.target.id === 'modal') {
+      closeModal();
+    }
+  }
+</script>
+
+<script>
+  new Chart(document.getElementById('chart'), {
+    type: 'line',
+    data: {
+      labels: {{ chart_labels| safe }},
+    datasets: [{
+      label: 'ยอดขาย',
+      data: {{ chart_data| safe }},
+    borderWidth: 3,
+    tension: 0.4,
+    fill: true
+   }]
+ },
+    options: {
+    plugins: { legend: { display: false } }
+  }
+});
+</script>
+
+{% endblock %}

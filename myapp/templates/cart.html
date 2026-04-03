@@ -263,10 +263,9 @@
       </thead>
       <tbody>
         {% for item in items %}
-        <tr class="cart-row" data-product-id="{{ item.product.pk }}" data-price="{{ item.product.price|default:0 }}"
-          data-weight-per-unit="{{ item.weight|default:0 }}"
-          data-update-url="{% url 'myapp:update_cart' item.product.pk %}"
-          data-remove-url="{% url 'myapp:remove_from_cart' item.product.pk %}">
+        <tr class="cart-row" data-product-id="{{ item.id }}" data-price="{{ item.price }}"
+          data-weight-per-unit="{{ item.weight }}" data-update-url="{% url 'myapp:update_cart' item.id %}"
+          data-remove-url="{% url 'myapp:remove_from_cart' item.id %}">
           <td class="col-image">
             <img class="product-img"
               src="{% if item.product.image %}{{ item.product.image.url }}{% else %}{% static 'images/uka.jpg' %}{% endif %}"
@@ -319,10 +318,15 @@
         <span><span id="sumGrand">{{ grand_total|default:total }}</span> บาท</span>
       </div>
     </div>
-
+    {% if request.user.is_authenticated or request.session.customer_id %}
     <a href="{% url 'myapp:checkout' %}" class="btn-checkout">
       ชำระเงิน
     </a>
+    {% else %}
+    <a href="#" class="btn-checkout" id="btnCheckout">
+      ชำระเงิน
+    </a>
+    {% endif %}
 
     <a href="{% url 'myapp:products' %}" class="btn btn-continue">เลือกสินค้าเพิ่มเติม</a>
   </div>
@@ -348,6 +352,28 @@
 </script>
 
 <script>
+  // ===== เช็ค login ก่อน checkout =====
+  // ===== เช็ค login ก่อน checkout =====
+  const checkoutBtn = document.getElementById("btnCheckout");
+
+  if (checkoutBtn) {
+    checkoutBtn.addEventListener("click", function (e) {
+      e.preventDefault();
+
+      Swal.fire({
+        icon: "warning",
+        title: "กรุณาเข้าสู่ระบบก่อน",
+        text: "คุณต้อง login ก่อนจึงจะสามารถสั่งซื้อสินค้าได้",
+        confirmButtonText: "ไปหน้าเข้าสู่ระบบ",
+        cancelButtonText: "ยกเลิก",
+        showCancelButton: true
+      }).then((result) => {
+        if (result.isConfirmed) {
+          window.location.href = "{% url 'myapp:login' %}?next={% url 'myapp:checkout' %}";
+        }
+      });
+    });
+  }
   const num = (v) => { if (v == null) return 0; if (typeof v === "number") return isFinite(v) ? v : 0; const s = String(v).replace(/[^\d.\-]/g, ""); const n = parseFloat(s); return isFinite(n) ? n : 0; }
   const fmt = (n) => Number(n || 0).toLocaleString()
 

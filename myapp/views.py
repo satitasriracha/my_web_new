@@ -1,4 +1,4 @@
-import json, re
+
 
 import json, secrets
 from datetime import timedelta
@@ -16,7 +16,8 @@ from django.core.serializers.json import DjangoJSONEncoder
 from collections import defaultdict, OrderedDict
 from datetime import datetime
 from django.views.decorators.csrf import csrf_exempt
-
+from django.contrib.auth.decorators import login_required
+from functools import wraps
 from .models import (
     User,
     PasswordResetToken,
@@ -36,6 +37,14 @@ from .models import (
     CartItem
 )
 
+from django.db.models import Count, Sum
+from django.db.models.functions import TruncDate
+from django.shortcuts import render
+from django.db.models import Q, Prefetch, Sum, F, Max, Count
+from django.db.models.functions import TruncDate
+from django.shortcuts import render, redirect
+from .models import Delivery, Sale
+from django.views.decorators.http import require_POST
 from .forms import (
     UserForm,
     ProductReceiveForm,
@@ -65,16 +74,17 @@ User = get_user_model()
 def home(request):
     user_name = None
 
-    # ถ้า login ด้วย Django User (แอดมิน/พนักงาน)
     if request.user.is_authenticated:
         user_name = request.user.get_full_name() or request.user.username
-    # ถ้า login ด้วย Customer (ใช้ session)
     elif request.session.get("customer_id"):
         user_name = request.session.get("customer_name")
 
-    # ไม่บังคับ redirect ไป login อีกแล้ว
-    return render(request, "myapp/home.html", {"user_name": user_name})
+    products = Product.objects.all()   # ✅ เพิ่มตรงนี้
 
+    return render(request, "myapp/home.html", {
+        "user_name": user_name,
+        "products": products   # ✅ ส่งไป template
+    })
 
 # -------------------- แสดงสินค้า --------------------
 def products(request):
@@ -94,8 +104,21 @@ def products(request):
 
 # -------------------- แสดงตะกร้า --------------------
 def cart_view(request):
-    cart = request.session.get("cart", {})
-    items, total, total_weight = [], 0, 0
+
+    # 🔥 key cart
+    if request.user.is_authenticated:
+        cart_key = f"cart_user_{request.user.id}"
+    elif request.session.get("customer_id"):
+        cart_key = f"cart_customer_{request.session.get('customer_id')}"
+    else:
+        cart_key = "cart_guest"
+
+    cart = request.session.get(cart_key, {})
+
+    items = []
+    total = 0
+    total_weight = 0
+    total_items = 0   # 🔥 เพิ่มตัวนี้
 
     for pk, qty in cart.items():
         try:
@@ -104,11 +127,12 @@ def cart_view(request):
             continue
 
         subtotal = product.price * qty
+
         total += subtotal
         total_weight += (product.weight or 0) * qty
+        total_items += qty   # 🔥 รวมจำนวนสินค้า
 
         items.append({
-            "product": product,
             "id": product.pk,
             "name": product.product_name,
             "price": float(product.price),
@@ -121,16 +145,17 @@ def cart_view(request):
     # 🚚 ค่าขนส่ง
     shipping_fee = 0
     shipping_rates_qs = ShippingRate.objects.all().order_by("weight")
+
     for r in shipping_rates_qs:
         if total_weight <= r.weight:
             shipping_fee = r.rate
             break
+
     if shipping_fee == 0 and shipping_rates_qs.exists():
         shipping_fee = shipping_rates_qs.last().rate
 
     grand_total = total + shipping_fee
 
-    # ✅ แปลงเป็น JSON string ให้ template ใช้งานได้
     shipping_rates = json.dumps(
         list(shipping_rates_qs.values("weight", "rate")),
         cls=DjangoJSONEncoder,
@@ -142,72 +167,180 @@ def cart_view(request):
         "total_weight": float(total_weight),
         "shipping_fee": float(shipping_fee),
         "grand_total": float(grand_total),
-        "shipping_rates": shipping_rates,  # ✅ ตอนนี้เป็น JSON แล้ว
+        "shipping_rates": shipping_rates,
+        "total_items": total_items,  # 🔥 เพิ่มตรงนี้
     }
 
-    # 🟢 ถ้าเป็น AJAX → ส่ง JSON
-    if request.headers.get("x-requested-with") == "XMLHttpRequest":
+    # 🔥 AJAX
+    if request.headers.get("X-Requested-With") == "XMLHttpRequest":
         return JsonResponse(context)
 
-    # 🟢 ถ้าเปิดหน้าเว็บ → render template
     return render(request, "cart.html", context)
+def update_sale_status(request, pk):
+    if request.method == "POST":
+        data = json.loads(request.body)
+        sale = Sale.objects.get(pk=pk)
+        sale.status = data.get("status")
+        sale.save()
+        return JsonResponse({"success": True})
+def delivery_tracking(request):
+    sale_id = request.GET.get("sale_id")
 
+    sales = Sale.objects.select_related("customer").order_by("-id")[:50]
+    sale = None
+
+    if sale_id:
+        sale = Sale.objects.filter(id=sale_id).first()
+
+    return render(request, "myapp/delivery_tracking.html", {
+        "sales": sales,
+        "sale": sale
+    })
+
+
+
+@require_POST
+def delivery_create(request):
+    sale_id = request.POST.get("sale_id")
+    address = request.POST.get("address")
+    status = request.POST.get("status")
+
+    sale = Sale.objects.get(id=sale_id)
+
+    # 🔥 map status delivery → sale
+    if status == "pending":
+        sale.status = 2   # ยืนยันการโอน
+    elif status == "shipping":
+        sale.status = 3   # รอจัดส่ง
+    elif status == "success":
+        sale.status = 4   # ส่งสำเร็จ
+
+    sale.save()
+
+    Delivery.objects.create(
+        sale=sale,
+        user=request.user,
+        address=address
+    )
+
+    return redirect("myapp:delivery_list")
+@csrf_exempt
+def update_status(request, id):
+    if request.method == "POST":
+        data = json.loads(request.body)
+        status = int(data.get("status"))
+
+        sale = Sale.objects.get(id=id)
+        sale.status = status
+        sale.save()
+
+        return JsonResponse({
+            "success": True,
+            "status": sale.get_status_display()
+        })
 # -------------------- เพิ่มสินค้าเข้าตะกร้า --------------------
 def add_to_cart(request, pk):
-    cart = request.session.get("cart", {})
-    cart[str(pk)] = cart.get(str(pk), 0) + 1
-    request.session["cart"] = cart
 
-    if request.GET.get("ajax") == "1":
+    # 🔥 อนุญาตเฉพาะ POST
+    if request.method != "POST":
+        return redirect("myapp:products")
+
+    # 🔥 แยก cart ตาม user
+    if request.user.is_authenticated:
+        cart_key = f"cart_user_{request.user.id}"
+    elif request.session.get("customer_id"):
+        cart_key = f"cart_customer_{request.session.get('customer_id')}"
+    else:
+        cart_key = "cart_guest"
+
+    cart = request.session.get(cart_key, {})
+
+    # 🔥 เพิ่มสินค้า
+    cart[str(pk)] = cart.get(str(pk), 0) + 1
+
+    request.session[cart_key] = cart
+    request.session.modified = True
+
+    total_items = sum(cart.values())
+
+    # 🔥 ถ้าเป็น AJAX → return JSON
+    if request.headers.get("X-Requested-With") == "XMLHttpRequest":
         return JsonResponse({
-            "total_items": sum(cart.values())
+            "total_items": total_items
         })
 
-    return redirect("myapp:cart")
+    # 🔥 fallback → redirect ปกติ
+    next_url = request.GET.get("next", "myapp:products")
+    return redirect(next_url)
 
-
+@login_required(login_url='login')
+def checkout(request):
+    # logic เดิม
+    return render(request, 'checkout.html')
 # -------------------- ลบสินค้าออกจากตะกร้า --------------------
 def remove_from_cart(request, pk):
     """ลบสินค้าออกจากตะกร้า (ใช้ session)"""
-    cart = request.session.get("cart", {})
+
+    # 🔥 ใช้ cart_key ให้ตรงระบบ
+    if request.user.is_authenticated:
+        cart_key = f"cart_user_{request.user.id}"
+    elif request.session.get("customer_id"):
+        cart_key = f"cart_customer_{request.session.get('customer_id')}"
+    else:
+        cart_key = "cart_guest"
+
+    cart = request.session.get(cart_key, {})
     success = False
 
     if str(pk) in cart:
         del cart[str(pk)]
-        request.session["cart"] = cart
+        request.session[cart_key] = cart
+        request.session.modified = True
         success = True
 
-    # ถ้ามาแบบ AJAX (fetch) → ตอบ JSON
     if request.headers.get("x-requested-with") == "XMLHttpRequest":
         return JsonResponse({"success": success, "cart": cart})
 
-    # ถ้ามาแบบธรรมดา → redirect
     if success:
         messages.success(request, "ลบสินค้าออกจากตะกร้าแล้ว ❌")
     else:
         messages.warning(request, "ไม่พบสินค้านี้ในตะกร้า")
 
-    return redirect("myapp:cart_view")
-
+    return redirect("myapp:cart")
 
 # -------------------- อัปเดตจำนวนสินค้า --------------------
+
 @csrf_exempt
 def update_cart(request, pk):
     """อัปเดตจำนวนสินค้าในตะกร้า"""
+
     if request.method == "POST":
-        cart = request.session.get("cart", {})
+
+        # 🔥 ใช้ cart_key
+        if request.user.is_authenticated:
+            cart_key = f"cart_user_{request.user.id}"
+        elif request.session.get("customer_id"):
+            cart_key = f"cart_customer_{request.session.get('customer_id')}"
+        else:
+            cart_key = "cart_guest"
+
+        cart = request.session.get(cart_key, {})
+
         try:
             data = json.loads(request.body)
         except:
             data = {}
+
         qty = int(data.get("qty", 1))
 
         if qty <= 0:
-            cart.pop(str(pk), None)  # ถ้าเหลือ 0 ลบสินค้าออก
+            cart.pop(str(pk), None)
         else:
             cart[str(pk)] = qty
 
-        request.session["cart"] = cart
+        request.session[cart_key] = cart
+        request.session.modified = True
+
         return JsonResponse({"success": True, "cart": cart})
 
     return JsonResponse({"success": False})
@@ -266,42 +399,85 @@ def register(request):
 
 
 def login_view(request):
-    status = None  # ✅ ค่าตั้งต้น ไม่มีแจ้งเตือน
-
-    if request.method == "POST":  # ✅ แสดงแจ้งเตือนเฉพาะตอน submit ฟอร์ม
+    if request.method == "POST":
         username = request.POST.get("username")
         password = request.POST.get("password")
 
-        # ตรวจสอบ Django User (admin / employee)
+        # ======================
+        # 🔐 Django User
+        # ======================
         user = authenticate(request, username=username, password=password)
         if user is not None:
             login(request, user)
-            status = "success"
-        else:
-            # ตรวจสอบ Customer (ชื่อหรือเบอร์)
-            customer = Customer.objects.filter(Q(name=username) | Q(phone=username)).first()
 
-            if customer:
-                if customer.check_password(password):
-                    request.session["customer_id"] = customer.customer_id
-                    request.session["customer_name"] = customer.name
-                    status = "success"
-                else:
-                    status = "incorrect_password"
+            # 👑 แยก role
+            if user.is_superuser:
+               return redirect("myapp:home")
+
+            if hasattr(user, "profile"):
+                if user.profile.position == "employee":
+                    return redirect("myapp:sale_list")
+
+                elif user.profile.position == "owner":
+                    return redirect("myapp:user_list")
+
+            return redirect("myapp:home")
+
+        # ======================
+        # 👤 Customer
+        # ======================
+        customer = Customer.objects.filter(
+            Q(name=username) | Q(phone=username)
+        ).first()
+
+        if customer:
+            if customer.check_password(password):
+                request.session["customer_id"] = customer.customer_id
+                request.session["customer_name"] = customer.name
+
+                return redirect("myapp:home")  # 🔥 สำคัญมาก
+
             else:
-                status = "username_not_found"
+                return render(request, "myapp/login.html", {
+                    "status": "incorrect_password"
+                })
 
-    # ✅ ถ้าเป็น GET (เปิดหน้า login ปกติ) → status=None
-    return render(request, "myapp/login.html", {"status": status})
+        return render(request, "myapp/login.html", {
+            "status": "username_not_found"
+        })
 
+    return render(request, "myapp/login.html")
+
+
+
+
+def get_current_customer(request):
+    if request.session.get("customer_id"):
+        return Customer.objects.filter(
+            customer_id=request.session.get("customer_id")
+        ).first()
+    return None
+def customer_required(view_func):
+    @wraps(view_func)
+    def wrapper(request, *args, **kwargs):
+        if request.session.get("customer_id"):
+            return view_func(request, *args, **kwargs)
+        return redirect("myapp:login")
+    return wrapper
+
+
+def employee_required(view_func):
+    @wraps(view_func)
+    def wrapper(request, *args, **kwargs):
+        if request.user.is_authenticated and hasattr(request.user, "profile"):
+            if request.user.profile.position in ["employee", "owner"]:
+                return view_func(request, *args, **kwargs)
+        return redirect("myapp:home")
+    return wrapper
 
 def logout_view(request):
-
     logout(request)
-
-    request.session.pop("customer_id", None)
-    request.session.pop("customer_name", None)
-
+    request.session.flush()
     return redirect("myapp:home")
 
 
@@ -733,7 +909,74 @@ def edit_employee(request, employee_id):
         {"form": form, "edit": True, "employee": employee},
     )
 
+def sale_page(request):
 
+    products = Product.objects.all()
+    customers = Customer.objects.all()
+    sales = Sale.objects.all().order_by("-id")[:20]
+
+    preview_code = "S" + timezone.now().strftime("%Y%m%d%H%M%S")
+
+    shipping_rates = [
+        {"weight":5,"rate":20},
+        {"weight":10,"rate":40},
+        {"weight":20,"rate":60},
+        {"weight":50,"rate":100},
+    ]
+
+    return render(request,"sale.html",{
+        "products":products,
+        "customers":customers,
+        "sales":sales,
+        "preview_code":preview_code,
+        "shipping_rates":shipping_rates
+    })
+
+
+def add_sale(request):
+
+    if request.method == "POST":
+
+        sale_code = request.POST.get("sale_code")
+        sale_date = request.POST.get("sale_date")
+        customer_id = request.POST.get("customer_id")
+        shipping_cost = request.POST.get("shipping_cost")
+
+        customer = get_object_or_404(Customer, customer_id=customer_id)
+
+        sale = Sale.objects.create(
+            sale_code=sale_code,
+            sale_date=sale_date,
+            customer=customer,
+            shipping_fee=shipping_cost,
+            created_by=request.user
+        )
+
+        items = json.loads(request.POST.get("items_json"))
+
+        for item in items:
+
+            product = get_object_or_404(Product, product_id=item["product_id"])
+
+            SaleItem.objects.create(
+                sale=sale,
+                product=product,
+                price=item["price"],
+                quantity=item["qty"]
+            )
+
+        return redirect("sale_receipt", sale_id=sale.id)
+
+    return redirect("sale_page")
+
+
+def sale_receipt(request, sale_id):
+
+    sale = get_object_or_404(Sale, id=sale_id)
+
+    return render(request,"receipt.html",{
+        "sale":sale
+    })
 # Delete employee
 def delete_employee(request, employee_id):
     employee = get_object_or_404(Employee, pk=employee_id)
@@ -792,7 +1035,95 @@ def sale_list(request):
         },
     )
 
+def dashboard(request):
 
+    total_sales = Sale.objects.count()
+    total_products = Product.objects.count()
+    total_customers = Customer.objects.count()
+    total_delivery = Delivery.objects.count()
+    total_payment = Payment.objects.count()
+
+    revenue = Payment.objects.aggregate(total=Sum('pay_total'))['total'] or 0
+
+    pending = Sale.objects.filter(status=1).count()
+    waiting = Sale.objects.filter(status=2).count()
+    shipping = Sale.objects.filter(status=3).count()
+    success = Sale.objects.filter(status=4).count()
+
+    # 🔥 Top Products
+    top_products = SaleItem.objects.values(
+        'product__product_name'
+    ).annotate(
+        total=Sum('quantity')
+    ).order_by('-total')[:5]
+
+    # 🔥 Recent Orders
+    recent_sales = Sale.objects.select_related('customer').order_by('-id')[:5]
+
+    # 🔥 Customers / Delivery / Payment
+    customers = Customer.objects.all().order_by('-id')
+    deliveries = Delivery.objects.select_related('sale__customer').order_by('-delivery_id')
+    payments = Payment.objects.select_related('sale__customer').order_by('-sale_id')
+
+    # =====================
+    # ✅ D8 รายงานสินค้า
+    # =====================
+    report_products = SaleItem.objects.values(
+        'product__product_name'
+    ).annotate(
+        total_qty=Sum('quantity')
+    ).order_by('-total_qty')
+
+    # =====================
+    # ✅ D9 รายงานการขาย
+    # =====================
+    report_sales = Sale.objects.values(
+        'status'
+    ).annotate(
+        total=Count('id')
+    )
+
+    # =====================
+    # ✅ D10 รายงานการเงิน
+    # =====================
+    report_finance = Payment.objects.aggregate(
+        total_income=Sum('pay_total'),
+        total_transactions=Count('id')
+    )
+
+    chart_labels = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun']
+    chart_data = [5,10,7,12,8,15,9]
+
+    context = {
+        'total_sales': total_sales,
+        'total_products': total_products,
+        'total_customers': total_customers,
+        'total_delivery': total_delivery,
+        'total_payment': total_payment,
+        'revenue': revenue,
+
+        'pending': pending,
+        'waiting': waiting,
+        'shipping': shipping,
+        'success': success,
+
+        'top_products': top_products,
+        'recent_sales': recent_sales,
+
+        'customers': customers,
+        'deliveries': deliveries,
+        'payments': payments,
+
+        # 🔥 REPORT
+        'report_products': report_products,
+        'report_sales': report_sales,
+        'report_finance': report_finance,
+
+        'chart_labels': chart_labels,
+        'chart_data': chart_data,
+    }
+
+    return render(request, 'myapp/dashboard.html', context)
 # ✅ ฟังก์ชันบันทึกการขาย
 @transaction.atomic
 def add_sale(request):
@@ -1127,9 +1458,13 @@ def delete_payment_confirmation(request, confirmation_id):
 
 # Delivery
 def delivery_list(request):
-    deliveries = Delivery.objects.all()
-    return render(request, "myapp/delivery_list.html", {"deliveries": deliveries})
+    deliveries = Delivery.objects.select_related('sale', 'user').all()
+    sales = Sale.objects.select_related("customer").all()
 
+    return render(request, "myapp/delivery_list.html", {
+        "deliveries": deliveries,
+        "sales": sales,
+    })
 
 def add_delivery(request):
     if request.method == "POST":
@@ -1254,7 +1589,29 @@ def shipping_rate_edit(request, pk):
     else:
         form = ShippingRateForm(instance=rate)
     return render(request, "myapp/shipping_rate_form.html", {"form": form})
+def checkout_payment(request, sale_id):
 
+    sale = Sale.objects.get(id=sale_id)
+
+    if request.method == "POST":
+
+        slip = request.FILES.get("slip_image")
+
+        Payment.objects.create(
+            sale=sale,
+            pay_total=sale.get_total(),
+            pay_type=0,
+            slip_image=slip
+        )
+
+        sale.status = 1
+        sale.save()
+
+        return redirect("payment_success")
+
+    return render(request,"checkout.html",{
+        "sale":sale
+    })
 
 def shipping_rate_delete(request, pk):
     rate = get_object_or_404(ShippingRate, pk=pk)
@@ -1263,43 +1620,145 @@ def shipping_rate_delete(request, pk):
     return redirect("myapp:shipping_rate_list")
 
 def checkout_view(request):
-    # 🔐 เช็ค login ก่อน
-    if not request.user.is_authenticated and not request.session.get("customer_id"):
-        # จำหน้าที่กำลังจะไป
-        request.session["next_url"] = request.path
-        return redirect("myapp:login")
 
-    cart = request.session.get('cart', {})
+    # 🔥 ใช้ cart_key ให้ตรงกับระบบ
+    if request.user.is_authenticated:
+        cart_key = f"cart_user_{request.user.id}"
+    elif request.session.get("customer_id"):
+        cart_key = f"cart_customer_{request.session.get('customer_id')}"
+    else:
+        cart_key = "cart_guest"
+
+    cart = request.session.get(cart_key, {})
+
+    if not cart:
+        return redirect("myapp:cart")
 
     items = []
     total = 0
     total_weight = 0
 
     for product_id, qty in cart.items():
-        product = Product.objects.get(pk=product_id)
-        subtotal = product.price * qty
-        weight = product.weight * qty
+        try:
+            product = Product.objects.get(pk=product_id)
+        except Product.DoesNotExist:
+            continue
 
-        items.append({
-            'product': product,
-            'qty': qty,
-            'subtotal': subtotal,
-            'weight': weight,
-        })
+        subtotal = product.price * qty
+        weight = (product.weight or 0) * qty
 
         total += subtotal
         total_weight += weight
 
+        items.append({
+            "product": product,
+            "qty": qty,
+            "subtotal": subtotal,
+            "weight": product.weight,
+        })
+
     shipping_fee = 25 if total_weight <= 1 else 350
     grand_total = total + shipping_fee
 
-    context = {
-        'items': items,
+    if request.method == "POST":
+
+        customer = None
+
+        # ลูกค้าปกติ
+        customer_id = request.session.get("customer_id")
+        if customer_id:
+            customer = Customer.objects.filter(customer_id=customer_id).first()
+
+        # admin / employee
+        if not customer and request.user.is_authenticated:
+            customer = Customer.objects.filter(customer_id="000").first()
+
+        if not customer:
+            messages.error(request, "กรุณาเข้าสู่ระบบก่อนสั่งซื้อ")
+            return redirect("myapp:login")
+
+        name = request.POST.get("name")
+        phone = request.POST.get("phone")
+        address = request.POST.get("address")
+
+        slip = request.FILES.get("slip_image")
+
+        sale = Sale.objects.create(
+            customer=customer,
+            shipping_fee=shipping_fee,
+            status=1
+        )
+
+        # บันทึกสินค้า
+        for item in items:
+            SaleItem.objects.create(
+                sale=sale,
+                product=item["product"],
+                price=item["product"].price,
+                quantity=item["qty"]
+            )
+
+        # บันทึก payment
+        Payment.objects.create(
+            sale=sale,
+            pay_total=grand_total,
+            pay_type=0,
+            slip_image=slip
+        )
+
+        # 🔥🔥🔥 จุดสำคัญ: ล้าง cart ให้ถูก key
+        request.session[cart_key] = {}
+        request.session.modified = True
+
+        return redirect("myapp:customer_orders")
+
+    return render(request, "checkout.html", {
+        "items": items,
         "total": total,
-        'shipping_fee': shipping_fee,
-        'grand_total': grand_total,
-    }
+        "shipping_fee": shipping_fee,
+        "grand_total": grand_total
+    })
 
-    return render(request, 'checkout.html', context)
+def customer_orders(request):
 
+    customer = None
 
+    # ลูกค้าปกติ
+    customer_id = request.session.get("customer_id")
+    if customer_id:
+        customer = Customer.objects.filter(customer_id=customer_id).first()
+
+    # admin / employee
+    if not customer and request.user.is_authenticated:
+        customer = Customer.objects.filter(customer_id="000").first()
+
+    if not customer:
+        return redirect("myapp:login")
+
+    orders = Sale.objects.filter(customer=customer)\
+        .prefetch_related("items__product")\
+        .order_by("-sale_date")
+
+    return render(request, "orders.html", {
+        "orders": orders
+    })
+from django.shortcuts import render, get_object_or_404
+from .models import Sale
+
+def invoice_view(request, sale_id):
+
+    sale = get_object_or_404(
+        Sale.objects.select_related("customer")
+        .prefetch_related("items__product", "payment"),
+        pk=sale_id
+    )
+
+    return render(request, "invoice.html", {
+        "sale": sale
+    })
+def report_sales(request):
+    sales = Sale.objects.select_related("customer").all().order_by("-id")
+
+    return render(request, "myapp/report_sales.html", {
+        "sales": sales
+    })
