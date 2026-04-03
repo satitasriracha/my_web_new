@@ -325,17 +325,19 @@
   <!-- ✅ 2. SweetAlert (ทำงานเฉพาะเมื่อมี status เท่านั้น) -->
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-  {% if status %}
+  {% if status == "username_not_found" %}
   <script>
-    {% if status == "username_not_found" %}
     Swal.fire({
       icon: "error",
       title: "ไม่พบชื่อผู้ใช้",
-      text: "กรุณากรอกชื่อผู้ใช้ใหม่อีกครั้ง",
+      text: "กรุณากรอกข้อมูลให้ถูกต้องอีกครั้ง",
       confirmButtonText: "ตกลง",
       confirmButtonColor: "#557B7C"
     });
-    {% elif status == "incorrect_password" %}
+  </script>
+
+  {% elif status == "incorrect_password" %}
+  <script>
     Swal.fire({
       icon: "warning",
       title: "รหัสผ่านไม่ถูกต้อง",
@@ -343,11 +345,14 @@
       confirmButtonText: "ตกลง",
       confirmButtonColor: "#557B7C"
     });
-    {% elif status == "success" %}
+  </script>
+
+  {% elif status == "success" %}
+  <script>
     Swal.fire({
       icon: "success",
       title: "เข้าสู่ระบบสำเร็จ!",
-      text: "กำลังนำคุณไปยังหน้าแรก...",
+      text: "กำลังพาคุณไปหน้าแรก...",
       showConfirmButton: false,
       timer: 2000,
       timerProgressBar: true,
@@ -355,7 +360,6 @@
         window.location.href = "{% url 'myapp:home' %}";
       }
     });
-    {% endif %}
   </script>
   {% endif %}
 

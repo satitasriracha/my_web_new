@@ -132,15 +132,15 @@ document.addEventListener("DOMContentLoaded", function () {
 
 <!-- ✅ แสดง SweetAlert2 เมื่อ Django ส่ง message กลับ -->
 {% if messages %}
-<script>
-{% for message in messages %}
-Swal.fire({
-    icon: '{% if "success" in message.tags %}success{% elif "error" in message.tags %}error{% else %}info{% endif %}',
-    title: '{{ message|escapejs }}',
-    showConfirmButton: false,
-    timer: 2000
-});
-{% endfor %}
-</script>
+    {% for message in messages %}
+    <script>
+        Swal.fire({
+            icon: "{{ message.tags|escapejs }}",
+            title: "{{ message|escapejs }}",
+            showConfirmButton: false,
+            timer: 2000
+        });
+    </script>
+    {% endfor %}
 {% endif %}
 {% endblock %}
