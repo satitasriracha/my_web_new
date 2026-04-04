@@ -24,30 +24,35 @@ class PasswordResetToken(models.Model):
 
 class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="profile")
-    phone = models.CharField(
-        max_length=20, blank=True, null=True, verbose_name="เบอร์โทร"
-    )
-    address = models.TextField(blank=True, null=True, verbose_name="ที่อยู่")
+    
+    user_code = models.CharField(max_length=10, unique=True, null=True, blank=True)  # ✅ เพิ่มตรงนี้
+
+    phone = models.CharField(max_length=20, blank=True, null=True)
+    address = models.TextField(blank=True, null=True)
+
     position = models.CharField(
         max_length=20,
         choices=[("employee", "พนักงาน"), ("admin", "แอดมิน"), ("owner", "เจ้าของกิจการ")],
         default="employee",
-        verbose_name="ตำแหน่ง",
     )
 
     def __str__(self):
-        return f"{self.user.username} ({self.position})"
+        return f"{self.user_code} - {self.user.get_full_name()}"
 
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
 
-        # ✅ sync position กับ groups
+    # ✅ generate หลังจากมี user.id แล้ว
+        if not self.user_code:
+            self.user_code = f"USR-{self.user.id:03d}"
+            super().save(update_fields=["user_code"])
+
+        super().save(*args, **kwargs)
+
+    # ✅ sync group (ของเดิมคุณ)
         if self.position:
-            # สร้าง group ถ้าไม่มี
             group, created = Group.objects.get_or_create(name=self.position)
-            # ล้าง group เก่าออกก่อน
             self.user.groups.clear()
-            # เพิ่ม group ใหม่
             self.user.groups.add(group)
 
 
