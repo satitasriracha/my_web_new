@@ -74,15 +74,15 @@ def home(request):
     user_name = None
 
     if request.user.is_authenticated:
-        user_name = request.user.get_full_name() or request.user.username
+        user_name = request.user.get_full_name()   # ✅ เอาแค่นี้พอ
     elif request.session.get("customer_id"):
         user_name = request.session.get("customer_name")
 
-    products = Product.objects.all()   # ✅ เพิ่มตรงนี้
+    products = Product.objects.all()
 
     return render(request, "myapp/home.html", {
         "user_name": user_name,
-        "products": products   # ✅ ส่งไป template
+        "products": products
     })
 
 # -------------------- แสดงสินค้า --------------------
@@ -405,9 +405,19 @@ def login_view(request):
         # ======================
         # 🔐 Django User
         # ======================
-        user = authenticate(request, username=username, password=password)
-        if user is not None:
-            login(request, user)
+        user = None
+        # 👉 ถ้าพิมพ์เป็น USR-xxx
+        if username.startswith("USR-"):
+            try:
+                user_id = int(username.split("-")[1]) 
+                user = User.objects.filter(id=user_id).first()
+            except:
+                user = None
+        else:
+            user = authenticate(request, username=username, password=password)
+
+        if user and user.check_password(password):
+            login(request, user)        
 
             # 👑 แยก role
             if user.is_superuser:
@@ -541,17 +551,19 @@ def user_list(request):
 
     users = []
     for user in all_users:
-        user_id = f"USR-{user.id:03d}"
+        profile = getattr(user, "profile", None)
+        if profile and profile.user_code:
+            user_id = profile.user_code
+        else:
+            continue   # 🔥 ข้าม user นี้ไปเลย
 
         # ✅ ใช้ first_name + last_name แทน username
         full_name = f"{user.first_name} {user.last_name}".strip()
         if not full_name.strip():  # ถ้าไม่กรอก → fallback เป็น username
-            full_name = user.username
+            full_name = "-"
 
         position = (
-            position_map.get(getattr(user.profile, "position", None), "—")
-            if hasattr(user, "profile")
-            else "—"
+            position_map.get(profile.position, "—") if profile else "—"
         )
 
         users.append(
@@ -559,8 +571,8 @@ def user_list(request):
                 "user_id": user_id,
                 "name": full_name,  # ✅ แสดงเป็นชื่อ-สกุล
                 "position": position,
-                "edit_url": f"/users/{user.id}/edit/",
-                "delete_url": f"/users/{user.id}/delete/",
+                "edit_url": f"/users/{user_id}/edit/",
+                "delete_url": f"/users/{user_id}/delete/",
             }
         )
 
@@ -612,18 +624,11 @@ def add_user(request):
 
 
 def edit_user(request, user_code):
-    if user_code.startswith("USR-"):
-        try:
-            real_id = int(user_code.split("-")[1])
-        except ValueError:
-            return HttpResponse("Invalid user code", status=400)
-    else:
-        real_id = user_code
+    # ✅ ใช้ user_code ตรง ๆ
+    profile = get_object_or_404(UserProfile, user_code=user_code)
+    user_obj = profile.user
 
-    user_obj = get_object_or_404(User, id=real_id)
-    profile, created = UserProfile.objects.get_or_create(user=user_obj)
-
-    # ✅ ตรวจสอบชื่อซ้ำผ่าน Ajax (สำหรับ JS)
+    # ✅ Ajax check
     if request.headers.get("x-requested-with") == "XMLHttpRequest":
         username = request.GET.get("username", "").strip()
         exists = User.objects.filter(username=username).exclude(id=user_obj.id).exists()
@@ -633,24 +638,21 @@ def edit_user(request, user_code):
         username = request.POST.get("username").strip()
         password = request.POST.get("password")
 
-        # ✅ ตรวจสอบชื่อซ้ำ
         if User.objects.filter(username=username).exclude(id=user_obj.id).exists():
             messages.error(request, f"ชื่อผู้ใช้ '{username}' ถูกใช้แล้ว ❌")
             return redirect("myapp:edit_user", user_code=user_code)
 
-        # ✅ อัปเดต user
         user_obj.username = username
         if password:
             user_obj.set_password(password)
         user_obj.save()
 
-        # ✅ อัปเดต profile
         profile.address = request.POST.get("address")
         profile.phone = request.POST.get("phone")
         profile.position = request.POST.get("position")
         profile.save()
 
-        messages.success(request, f"แก้ไขข้อมูลผู้ใช้ {user_obj.username} เรียบร้อยแล้ว ✅")
+        messages.success(request, f"แก้ไขข้อมูลผู้ใช้สำเร็จ ✅")
         return redirect("myapp:user_list")
 
     position_choices = UserProfile._meta.get_field("position").choices
@@ -661,7 +663,7 @@ def edit_user(request, user_code):
         {
             "user_obj": user_obj,
             "profile": profile,
-            "user_code": f"USR-{user_obj.id:03d}",
+            "user_code": profile.user_code,  # ✅ แก้ตรงนี้ด้วย
             "position_choices": position_choices,
         },
     )

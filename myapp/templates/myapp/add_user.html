@@ -22,8 +22,14 @@
 
         <!-- ชื่อ -->
         <div class="form-group">
-            {{ user_form.username.label_tag }}
-            {{ user_form.username }}
+            {{ user_form.first_name.label_tag }}
+            {{ user_form.first_name }}
+        </div>
+
+        <!-- นามสกุล -->
+        <div class="form-group">
+            {{ user_form.last_name.label_tag }}
+            {{ user_form.last_name }}
         </div>
 
         <!-- ที่อยู่ -->
@@ -42,9 +48,11 @@
         <div class="form-group">
             {{ profile_form.position.label_tag }}
             <select name="position" class="form-control" required>
-                <option value="employee" {% if profile_form.position.value == "employee" %}selected{% endif %}>พนักงาน</option>
+                <option value="employee" {% if profile_form.position.value == "employee" %}selected{% endif %}>พนักงาน
+                </option>
                 <option value="admin" {% if profile_form.position.value == "admin" %}selected{% endif %}>แอดมิน</option>
-                <option value="owner" {% if profile_form.position.value == "owner" %}selected{% endif %}>เจ้าของกิจการ</option>
+                <option value="owner" {% if profile_form.position.value == "owner" %}selected{% endif %}>เจ้าของกิจการ
+                </option>
             </select>
         </div>
 
@@ -72,33 +80,22 @@
 <script>
 document.addEventListener("DOMContentLoaded", function () {
     const form = document.getElementById("userForm");
-    const username = document.getElementById("id_username");
     const password = document.getElementById("id_password");
     const confirmPassword = document.getElementById("id_confirm_password");
 
-    form.addEventListener("submit", async function (e) {
-        e.preventDefault(); // หยุดส่งชั่วคราว
+    if (!form) return;
 
-        const user = username.value.trim();
-        if (!user) return;
+    form.addEventListener("submit", function (e) {
+        e.preventDefault(); // ⛔ หยุดส่งก่อน
 
-        // ✅ ตรวจสอบชื่อซ้ำแบบ AJAX
-        const res = await fetch(`?username=${encodeURIComponent(user)}`, {
-            headers: { 'X-Requested-With': 'XMLHttpRequest' }
-        });
-        const data = await res.json();
-
-        if (data.exists) {
-            Swal.fire({
-                icon: 'error',
-                title: 'ชื่อผู้ใช้ซ้ำ!',
-                text: `ชื่อ "${user}" ถูกใช้ในระบบแล้ว ❌`,
-                confirmButtonColor: '#d33'
-            });
+        // ✅ เช็คว่ามี input จริง
+        if (!password || !confirmPassword) {
+            console.error("Password fields not found");
+            form.submit();
             return;
         }
 
-        // ✅ ตรวจสอบรหัสผ่านไม่ตรงกัน
+        // ✅ ตรวจสอบรหัสผ่าน
         if (password.value !== confirmPassword.value) {
             Swal.fire({
                 icon: 'warning',
@@ -111,7 +108,7 @@ document.addEventListener("DOMContentLoaded", function () {
             return;
         }
 
-        // ✅ ถ้าทุกอย่างถูกต้อง — ถามยืนยันก่อนบันทึก
+        // ✅ ยืนยันก่อนบันทึก
         Swal.fire({
             title: 'คุณแน่ใจหรือไม่?',
             text: 'ต้องการบันทึกข้อมูลผู้ใช้ใหม่นี้หรือไม่',
@@ -133,14 +130,14 @@ document.addEventListener("DOMContentLoaded", function () {
 <!-- ✅ แสดง SweetAlert2 เมื่อ Django ส่ง message กลับ -->
 {% if messages %}
 <script>
-{% for message in messages %}
-Swal.fire({
-    icon: '{% if "success" in message.tags %}success{% elif "error" in message.tags %}error{% else %}info{% endif %}',
-    title: '{{ message|escapejs }}',
-    showConfirmButton: false,
-    timer: 2000
-});
-{% endfor %}
+    {% for message in messages %}
+    Swal.fire({
+        icon: '{% if "success" in message.tags %}success{% elif "error" in message.tags %}error{% else %}info{% endif %}',
+        title: '{{ message|escapejs }}',
+        showConfirmButton: false,
+        timer: 2000
+    });
+    {% endfor %}
 </script>
 {% endif %}
 {% endblock %}
