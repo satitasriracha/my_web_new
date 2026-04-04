@@ -267,88 +267,98 @@
   class="{% if user.is_authenticated %}{% if user.is_superuser or user.profile.position == 'supper' or user.profile.position == 'owner' or user.is_staff or user.profile.position == 'employee' %}has-sidebar{% endif %}{% endif %}">
   {% if user.is_authenticated %}
 
-  {% comment %} ✅ ADMIN / OWNER เห็นทั้งหมด {% endcomment %}
-  {% if user.is_superuser or user.profile.position == 'supper' or user.profile.position == 'owner' %}
+  {% comment %} 🔥 OWNER เท่านั้น {% endcomment %}
+  {% if user.profile.position == 'owner' %}
 
   <div class="sidebar">
-    <h2><i class="bi bi-shield-lock"></i> แผงควบคุมหลัก</h2>
+    <h2><i class="bi bi-graph-up"></i> เมนูเจ้าของกิจการ</h2>
 
-    <div class="sidebar-group" id="basicMasterGroup">
-      <div class="group-header" onclick="toggleGroup('basicMasterGroup')">
-        <div class="group-title"><i class="bi bi-gear-fill"></i> จัดการข้อมูลพื้นฐาน</div>
-        <span class="caret">▶</span>
-      </div>
-      <div class="submenu">
-        <a href="{% url 'myapp:store_list' %}"><i class="bi bi-shop"></i> ข้อมูลร้าน</a>
-        <a href="{% url 'myapp:product_list' %}"><i class="bi bi-box-seam"></i> ข้อมูลสินค้า</a>
-        <a href="{% url 'myapp:user_list' %}"><i class="bi bi-people"></i> ข้อมูลผู้ใช้ระบบ</a>
-        <a href="{% url 'myapp:shipping_rate_list' %}"><i class="bi bi-truck"></i> อัตราค่าขนส่ง</a>
-      </div>
-    </div>
+    <!-- Dashboard -->
     <div class="sidebar-group" id="dashboardGroup">
-  <div class="group-header" onclick="toggleGroup('dashboardGroup')">
-    <div class="group-title">
-      <i class="bi bi-speedometer2"></i> Dashboard
-    </div>
-    <span class="caret">▶</span>
-  </div>
-
-  <div class="submenu">
-    <a href="{% url 'myapp:dashboard' %}">
-      <i class="bi bi-bar-chart-line"></i> ภาพรวมระบบ
-    </a>
-
-    <a href="{% url 'myapp:sale_list' %}">
-      <i class="bi bi-cart-check"></i> รายงานการขาย
-    </a>
-
-    <a href="{% url 'myapp:delivery_list' %}">
-      <i class="bi bi-truck"></i> รายงานจัดส่ง
-    </a>
-
-    <a href="{% url 'myapp:product_list' %}">
-      <i class="bi bi-box-seam"></i> สินค้า
-    </a>
-
-    <a href="{% url 'myapp:user_list' %}">
-      <i class="bi bi-people"></i> ลูกค้า
-    </a>
-  </div>
-</div>
-    <!-- 🔥 เพิ่มใน ADMIN ใต้ saleProductGroup -->
-    <div class="sidebar-group" id="deliveryGroup">
-      <div class="group-header" onclick="toggleGroup('deliveryGroup')">
+      <div class="group-header" onclick="toggleGroup('dashboardGroup')">
         <div class="group-title">
-          <i class="bi bi-truck"></i> จัดส่งสินค้า 
+          <i class="bi bi-speedometer2"></i> Dashboard
         </div>
         <span class="caret">▶</span>
       </div>
 
       <div class="submenu">
+        <a href="{% url 'myapp:dashboard' %}">
+          <i class="bi bi-bar-chart-line"></i> ภาพรวมระบบ
+        </a>
+
+        <a href="{% url 'myapp:sale_list' %}">
+          <i class="bi bi-cart-check"></i> รายงานการขาย
+        </a>
+
         <a href="{% url 'myapp:delivery_list' %}">
-          <i class="bi bi-list"></i> รายการจัดส่งสินค้า
+          <i class="bi bi-truck"></i> รายงานจัดส่ง
         </a>
 
-        <a href="{% url 'myapp:delivery_create' %}">
-          <i class="bi bi-plus-circle"></i> สร้างการจัดส่ง
+        <a href="{% url 'myapp:product_list' %}">
+          <i class="bi bi-box-seam"></i> สินค้า
         </a>
 
-        <a href="{% url 'myapp:delivery_tracking' %}">
-          <i class="bi bi-geo-alt"></i> ติดตามสถานะ
+        <a href="{% url 'myapp:user_list' %}">
+          <i class="bi bi-people"></i> ลูกค้า
         </a>
       </div>
     </div>
+
+    <!-- รายงาน -->
     <div class="sidebar-group" id="saleProductGroup">
       <div class="group-header" onclick="toggleGroup('saleProductGroup')">
         <div class="group-title"><i class="bi bi-graph-up-arrow"></i> รายงานการขาย</div>
         <span class="caret">▶</span>
       </div>
       <div class="submenu">
-        <a href="{% url 'myapp:sale_list' %}"><i class="bi bi-list-check"></i> ข้อมูลการขายสินค้า</a>
+        <a href="{% url 'myapp:sale_list' %}">
+          <i class="bi bi-list-check"></i> ข้อมูลการขายสินค้า
+        </a>
       </div>
     </div>
 
-    <a href="{% url 'myapp:home' %}"><i class="bi bi-house-door"></i> กลับหน้าหลักร้านค้า</a>
+    <a href="{% url 'myapp:home' %}">
+      <i class="bi bi-house-door"></i> กลับหน้าหลักร้านค้า
+    </a>
+  </div>
+
+  {% comment %} 🔥 ADMIN เท่านั้น {% endcomment %}
+  {% elif user.is_superuser or user.profile.position == 'admin' %}
+
+  <div class="sidebar">
+    <h2><i class="bi bi-shield-lock"></i> เมนูผู้ดูแลระบบ</h2>
+
+    <div class="sidebar-group" id="basicMasterGroup">
+      <div class="group-header" onclick="toggleGroup('basicMasterGroup')">
+        <div class="group-title">
+          <i class="bi bi-gear-fill"></i> จัดการข้อมูลพื้นฐาน
+        </div>
+        <span class="caret">▶</span>
+      </div>
+
+      <div class="submenu">
+        <a href="{% url 'myapp:store_list' %}">
+          <i class="bi bi-shop"></i> ข้อมูลร้าน
+        </a>
+
+        <a href="{% url 'myapp:product_list' %}">
+          <i class="bi bi-box-seam"></i> ข้อมูลสินค้า
+        </a>
+
+        <a href="{% url 'myapp:user_list' %}">
+          <i class="bi bi-people"></i> ข้อมูลผู้ใช้ระบบ
+        </a>
+
+        <a href="{% url 'myapp:shipping_rate_list' %}">
+          <i class="bi bi-truck"></i> อัตราค่าขนส่ง
+        </a>
+      </div>
+    </div>
+
+    <a href="{% url 'myapp:home' %}">
+      <i class="bi bi-house-door"></i> กลับหน้าหลักร้านค้า
+    </a>
   </div>
 
   {% comment %} ✅ EMPLOYEE {% endcomment %}
@@ -356,8 +366,22 @@
 
   <div class="sidebar">
     <h2><i class="bi bi-person-badge"></i> เมนูพนักงาน</h2>
-    <a href="{% url 'myapp:product_list' %}"><i class="bi bi-box-seam"></i> ตรวจสอบสต็อกสินค้า</a>
-    <a href="{% url 'myapp:sale_list' %}"><i class="bi bi-cart-plus"></i> บันทึกการขายใหม่</a>
+    <a href="{% url 'myapp:product_list' %}"><i class="bi bi-box-seam"></i> รับสินค้าเข้าคลัง</a>
+    <a href="{% url 'myapp:sale_list' %}"><i class="bi bi-cart-plus"></i> ขายสินค้า</a>
+    <div class="group-title">
+      <i class="bi bi-truck"></i> จัดส่งสินค้า
+    </div>
+    <a href="{% url 'myapp:delivery_list' %}">
+      <i class="bi bi-list"></i> รายการจัดส่งสินค้า
+    </a>
+
+    <a href="{% url 'myapp:delivery_create' %}">
+      <i class="bi bi-plus-circle"></i> สร้างการจัดส่ง
+    </a>
+
+    <a href="{% url 'myapp:delivery_tracking' %}">
+      <i class="bi bi-geo-alt"></i> ติดตามสถานะ
+    </a>
     <a href="{% url 'myapp:home' %}"><i class="bi bi-house-door"></i> หน้าหลัก</a>
   </div>
 

@@ -36,7 +36,6 @@ from .models import (
     UserProfile,
     CartItem
 )
-
 from django.db.models import Count, Sum
 from django.db.models.functions import TruncDate
 from django.shortcuts import render
@@ -1084,17 +1083,17 @@ def dashboard(request):
     )
 
     # =====================
-    # ✅ D10 รายงานการเงิน
-    # =====================
+# ✅ D10 รายงานการเงิน
+# =====================
     report_finance = Payment.objects.aggregate(
-        total_income=Sum('pay_total'),
-        total_transactions=Count('id')
+    total_income=Sum('pay_total'),
+    total_transactions=Count('*'),
     )
 
     chart_labels = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun']
     chart_data = [5,10,7,12,8,15,9]
-
     context = {
+    
         'total_sales': total_sales,
         'total_products': total_products,
         'total_customers': total_customers,
@@ -1122,9 +1121,8 @@ def dashboard(request):
         'chart_labels': chart_labels,
         'chart_data': chart_data,
     }
+    return render(request,'myapp/dashboard.html',context)
 
-    return render(request, 'myapp/dashboard.html', context)
-# ✅ ฟังก์ชันบันทึกการขาย
 @transaction.atomic
 def add_sale(request):
     if request.method == "POST":
