@@ -1,6 +1,6 @@
 
 
-import json, secrets
+import json, secrets,re
 from datetime import timedelta
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse, JsonResponse
@@ -142,23 +142,25 @@ def cart_view(request):
         })
 
     # 🚚 ค่าขนส่ง
+    # 🚚 ค่าขนส่ง
     shipping_fee = 0
     shipping_rates_qs = ShippingRate.objects.all().order_by("weight")
 
-    for r in shipping_rates_qs:
-        if total_weight <= r.weight:
-            shipping_fee = r.rate
+    for rate in shipping_rates_qs:
+        if total_weight <= rate.weight:
+            shipping_fee = rate.rate
             break
 
     if shipping_fee == 0 and shipping_rates_qs.exists():
         shipping_fee = shipping_rates_qs.last().rate
 
+    # ✅ FIX ต้องมีบรรทัดนี้
     grand_total = total + shipping_fee
 
     shipping_rates = json.dumps(
-        list(shipping_rates_qs.values("weight", "rate")),
-        cls=DjangoJSONEncoder,
-    )
+         list(shipping_rates_qs.values("weight", "rate")),
+    cls=DjangoJSONEncoder,
+)
 
     context = {
         "items": items,
@@ -1621,7 +1623,9 @@ def shipping_rate_delete(request, pk):
 
 def checkout_view(request):
 
-    # 🔥 ใช้ cart_key ให้ตรงกับระบบ
+    # ----------------------------
+    # cart key
+    # ----------------------------
     if request.user.is_authenticated:
         cart_key = f"cart_user_{request.user.id}"
     elif request.session.get("customer_id"):
@@ -1634,6 +1638,9 @@ def checkout_view(request):
     if not cart:
         return redirect("myapp:cart")
 
+    # ----------------------------
+    # cart items
+    # ----------------------------
     items = []
     total = 0
     total_weight = 0
@@ -1657,39 +1664,58 @@ def checkout_view(request):
             "weight": product.weight,
         })
 
+    # ----------------------------
+    # shipping
+    # ----------------------------
     shipping_fee = 25 if total_weight <= 1 else 350
     grand_total = total + shipping_fee
 
+    # ----------------------------
+    # customer auto fill
+    # ----------------------------
+    customer = None
+    full_name = ""
+    phone = ""
+    address = ""
+
+    # ลูกค้าปกติ
+    customer_id = request.session.get("customer_id")
+    if customer_id:
+        customer = Customer.objects.filter(customer_id=customer_id).first()
+
+    if customer:
+        full_name = customer.name
+        phone = customer.phone
+        address = customer.address
+
+    # Admin / Employee
+    elif request.user.is_authenticated:
+        full_name = request.user.get_full_name()
+
+        if hasattr(request.user, "profile"):
+            phone = request.user.profile.phone
+            address = request.user.profile.address
+
+    # ----------------------------
+    # submit payment
+    # ----------------------------
     if request.method == "POST":
-
-        customer = None
-
-        # ลูกค้าปกติ
-        customer_id = request.session.get("customer_id")
-        if customer_id:
-            customer = Customer.objects.filter(customer_id=customer_id).first()
-
-        # admin / employee
-        if not customer and request.user.is_authenticated:
-            customer = Customer.objects.filter(customer_id="000").first()
-
-        if not customer:
-            messages.error(request, "กรุณาเข้าสู่ระบบก่อนสั่งซื้อ")
-            return redirect("myapp:login")
 
         name = request.POST.get("name")
         phone = request.POST.get("phone")
         address = request.POST.get("address")
-
         slip = request.FILES.get("slip_image")
+
+        if not customer:
+            customer = Customer.objects.filter(customer_id="000").first()
 
         sale = Sale.objects.create(
             customer=customer,
             shipping_fee=shipping_fee,
-            status=1
+            status=2,
+            note=f"{name} | {phone} | {address}"
         )
 
-        # บันทึกสินค้า
         for item in items:
             SaleItem.objects.create(
                 sale=sale,
@@ -1698,7 +1724,6 @@ def checkout_view(request):
                 quantity=item["qty"]
             )
 
-        # บันทึก payment
         Payment.objects.create(
             sale=sale,
             pay_total=grand_total,
@@ -1706,19 +1731,26 @@ def checkout_view(request):
             slip_image=slip
         )
 
-        # 🔥🔥🔥 จุดสำคัญ: ล้าง cart ให้ถูก key
+        # clear cart
         request.session[cart_key] = {}
         request.session.modified = True
 
         return redirect("myapp:customer_orders")
 
+    # ----------------------------
+    # render page
+    # ----------------------------
     return render(request, "checkout.html", {
         "items": items,
         "total": total,
         "shipping_fee": shipping_fee,
-        "grand_total": grand_total
-    })
+        "grand_total": grand_total,
 
+        # auto fill data
+        "full_name": full_name,
+        "phone": phone,
+        "address": address,
+    })
 def customer_orders(request):
 
     customer = None
@@ -1746,13 +1778,11 @@ from django.shortcuts import render, get_object_or_404
 from .models import Sale
 
 def invoice_view(request, sale_id):
-
     sale = get_object_or_404(
         Sale.objects.select_related("customer")
         .prefetch_related("items__product", "payment"),
         pk=sale_id
     )
-
     return render(request, "invoice.html", {
         "sale": sale
     })
@@ -1761,4 +1791,165 @@ def report_sales(request):
 
     return render(request, "myapp/report_sales.html", {
         "sales": sales
+    })
+  
+def sale_preview(request):
+    if request.method == "POST":
+        import json
+
+        cart = json.loads(request.POST.get("items_json"))
+
+        items = []
+        subtotal = 0
+
+        for item in cart:
+            total = item["price"] * item["qty"]
+            subtotal += total
+
+            items.append({
+                "name": item["name"],
+                "qty": item["qty"],
+                "total": total
+            })
+
+        shipping = float(request.POST.get("shipping_cost", 0))
+        grand_total = subtotal + shipping
+
+        return render(request, "myapp/sale_preview.html", {
+            "items": items,
+            "subtotal": subtotal,
+            "shipping": shipping,
+            "grand_total": grand_total,
+        })
+def pay_api(request, id):
+            sale = get_object_or_404(Sale, id=id)
+
+            try:
+                payment = Payment.objects.get(sale=sale)
+            except Payment.DoesNotExist:
+                 return JsonResponse({'error': 'no payment'}, status=404)
+
+            return JsonResponse({
+                'id': sale.id,
+                'cus': sale.customer.name,
+                'date': sale.sale_date.strftime('%d/%m/%Y'),
+                'slip': payment.slip_image.url if payment.slip_image else ''
+            })
+def pay_list(request):
+    sales = Sale.objects.filter(status=2)
+    print("DEBUG:", sales)
+    return render(request, 'pay/pay.html', {'sales': sales})
+@login_required
+def pay_ok(request, id):
+    if request.method != 'POST':
+        return JsonResponse({'error': 'invalid'}, status=400)
+
+    sale = get_object_or_404(Sale, id=id)
+
+    # 🔒 กันกดซ้ำ
+    if sale.status != 2:
+        return JsonResponse({'error': 'already processed'}, status=400)
+
+    try:
+        payment = Payment.objects.get(sale=sale)
+    except Payment.DoesNotExist:
+        return JsonResponse({'error': 'no payment'}, status=400)
+
+    # 🔥 ทำทุกอย่างใน transaction เดียว
+    with transaction.atomic():
+
+        # 1️⃣ เปลี่ยนสถานะ
+        sale.status = 3  # รอจัดส่ง
+        sale.save()
+
+        # 2️⃣ ตัด stock
+        for item in sale.items.all():
+            Product.objects.filter(
+                pk=item.product.pk,
+                quantity__gte=item.quantity
+            ).update(quantity=F('quantity') - item.quantity)
+
+        # 3️⃣ สร้างใบยืนยัน (ถ้ายังไม่มี)
+        if not PaymentConfirmation.objects.filter(payment=payment).exists():
+            PaymentConfirmation.objects.create(
+                payment=payment,
+                user=request.user
+            )
+
+    return JsonResponse({'ok': True})
+def confirm_order_view(request):
+    if request.user.is_authenticated:
+        cart_key = f"cart_user_{request.user.id}"
+    elif request.session.get("customer_id"):
+        cart_key = f"cart_customer_{request.session.get('customer_id')}"
+    else:
+        cart_key = "cart_guest"
+
+    cart = request.session.get(cart_key, {})
+
+    if not cart:
+        return redirect("myapp:cart")
+
+    items = []
+    total = 0
+    total_weight = 0
+    total_items = 0
+
+    for product_id, qty in cart.items():
+        try:
+            product = Product.objects.get(pk=product_id)
+        except Product.DoesNotExist:
+            continue
+
+        subtotal = product.price * qty
+        weight = (product.weight or 0) * qty
+
+        total += subtotal
+        total_weight += weight
+        total_items += qty
+
+        items.append({
+            "product": product,
+            "qty": qty,
+            "subtotal": subtotal,
+            "weight": weight,
+        })
+
+    shipping_fee = 0
+    rates = ShippingRate.objects.all().order_by("weight")
+
+    for r in rates:
+        if total_weight <= r.weight:
+            shipping_fee = r.rate
+            break
+
+    if shipping_fee == 0 and rates.exists():
+        shipping_fee = rates.last().rate
+
+    grand_total = total + shipping_fee
+
+    name = ""
+    phone = ""
+    address = ""
+
+    customer = None
+    if request.session.get("customer_id"):
+        customer = Customer.objects.filter(
+            customer_id=request.session.get("customer_id")
+        ).first()
+
+    if customer:
+        name = customer.name
+        phone = customer.phone
+        address = customer.address
+
+    return render(request, "confirm_order.html", {
+        "items": items,
+        "total": total,
+        "shipping_fee": shipping_fee,
+        "grand_total": grand_total,
+        "total_items": total_items,
+        "name": name,
+        "phone": phone,
+        "address": address,
     })

@@ -1,236 +1,68 @@
-{% extends "base.html" %}
-{% block title %}ติดตามสถานะ{% endblock %}
-
+{% extends 'base.html' %}
 {% block content %}
 
 <style>
-.tracking-container {
-    max-width: 900px;
-    margin: auto;
-    background: #fff;
-    padding: 30px;
-    border-radius: 16px;
-    box-shadow: 0 8px 20px rgba(0,0,0,0.08);
-}
-
-/* 🔥 search */
-.search-box {
-    margin-bottom: 15px;
-}
-
-.search-box input {
-    border-radius: 10px;
-    padding: 10px;
-}
-
-/* 🔥 LIST */
-.order-list {
-    max-height: 220px;
-    overflow-y: auto;
-    border: 1px solid #eee;
-    border-radius: 10px;
-}
-
-.order-item {
-    padding: 12px;
-    border-bottom: 1px solid #eee;
-    cursor: pointer;
-    transition: 0.2s;
-}
-
-.order-item:hover {
-    background: #f5f5f5;
-}
-
-.order-item.active {
-    background: #e3f2fd;
-}
-
-/* 🔥 badge */
-.badge {
-    float: right;
-    padding: 4px 8px;
-    border-radius: 6px;
-    color: white;
-    font-size: 0.8rem;
-}
-
-.s1 { background: #7f8c8d; }
-.s2 { background: #f39c12; }
-.s3 { background: #3498db; }
-.s4 { background: #2ecc71; }
-
-/* 🔥 timeline */
-.timeline {
-    position: relative;
-    margin-top: 20px;
-}
-
-.timeline::before {
-    content: '';
-    position: absolute;
-    left: 20px;
-    width: 4px;
-    height: 100%;
-    background: #ddd;
-}
-
-.timeline-progress {
-    position: absolute;
-    left: 20px;
-    width: 4px;
-    background: linear-gradient(to bottom, #4caf50, #2196f3);
-}
-
-.timeline-step {
-    padding-left: 60px;
-    margin-bottom: 25px;
-    opacity: 0.4;
-}
-
-.timeline-step.active { opacity: 1; }
-
-.circle {
-    position: absolute;
-    left: 10px;
-    width: 22px;
-    height: 22px;
-    background: #ccc;
-    border-radius: 50%;
-}
-
-.timeline-step.active .circle {
-    background: #4caf50;
-}
-
-.timeline-step.current .circle {
-    background: #ff9800;
-    animation: pulse 1s infinite;
-}
-
-@keyframes pulse {
-    0% {transform: scale(1);}
-    50% {transform: scale(1.2);}
-    100% {transform: scale(1);}
-}
-
-/* order box */
-.order-box {
-    background: #f5f7fa;
-    padding: 15px;
-    border-radius: 10px;
-}
-
-/* empty */
-.no-result {
-    text-align: center;
-    padding: 10px;
-    color: #999;
-    display: none;
-}
+.box { background:#fff; margin:40px; padding:20px; border-radius:12px; }
+table { width:100%; border-collapse:collapse; }
+th, td { padding:12px; text-align:center; }
+th { background:#d8f3dc; }
+.done { background:#52b788; color:white; border:none; padding:6px 10px; border-radius:6px; }
 </style>
 
-<div class="tracking-container">
+<div class="box">
+<h2>📦 รอจัดส่งสินค้า</h2>
 
-<h3>📦 เลือกคำสั่งซื้อ</h3>
-
-<!-- 🔍 SEARCH -->
-<div class="search-box">
-    <input type="text" id="searchInput" class="form-control"
-           placeholder="🔍 พิมพ์ค้นหา Order หรือ ชื่อลูกค้า...">
-</div>
-
-<!-- 🔥 LIST -->
-<div class="order-list" id="orderList">
+<table>
+<tr>
+    <th>รหัสขาย</th>
+    <th>ลูกค้า</th>
+    <th>วันที่</th>
+    <th>จัดส่ง</th>
+</tr>
 
 {% for s in sales %}
-<a href="?sale_id={{ s.id }}" style="text-decoration:none; color:black;">
-
-<div class="order-item {% if sale and sale.id == s.id %}active{% endif %}">
-    
-    <b>🧾 #{{ s.id }}</b> - {{ s.customer.name }}
-
-    <span class="badge s{{ s.status }}">
-        {{ s.get_status_display }}
-    </span>
-
-</div>
-
-</a>
+<tr id="r{{s.id}}">
+    <td>{{ s.sale_code }}</td>
+    <td>{{ s.customer.name }}</td>
+    <td>{{ s.sale_date|date:"d/m/Y" }}</td>
+    <td>
+        <button class="done" onclick="done({{s.id}})">
+            🚚 จัดส่งแล้ว
+        </button>
+    </td>
+</tr>
+{% empty %}
+<tr><td colspan="4">ไม่มีรายการ</td></tr>
 {% endfor %}
-
-<div class="no-result" id="noResult">❌ ไม่พบข้อมูล</div>
-
+</table>
 </div>
 
-{% if sale %}
-
-<div class="order-box mt-3">
-    <b>Order:</b> #{{ sale.id }} <br>
-    👤 {{ sale.customer.name }} <br>
-    📊 {{ sale.get_status_display }}
-</div>
-
-<div class="timeline">
-
-    <div class="timeline-progress" style="
-        height:
-        {% if sale.status == 1 %}25%
-        {% elif sale.status == 2 %}50%
-        {% elif sale.status == 3 %}75%
-        {% else %}100%
-        {% endif %}
-    "></div>
-
-    <div class="timeline-step {% if sale.status >= 1 %}active{% endif %} {% if sale.status == 1 %}current{% endif %}">
-        <div class="circle"></div> 📌 รอดำเนินการ
-    </div>
-
-    <div class="timeline-step {% if sale.status >= 2 %}active{% endif %} {% if sale.status == 2 %}current{% endif %}">
-        <div class="circle"></div> ⏳ รอจัดส่ง
-    </div>
-
-    <div class="timeline-step {% if sale.status >= 3 %}active{% endif %} {% if sale.status == 3 %}current{% endif %}">
-        <div class="circle"></div> 🚚 กำลังจัดส่ง
-    </div>
-
-    <div class="timeline-step {% if sale.status >= 4 %}active{% endif %} {% if sale.status == 4 %}current{% endif %}">
-        <div class="circle"></div> ✅ สำเร็จ
-    </div>
-
-</div>
-
-{% else %}
-<div class="text-center text-muted mt-4">
-    👉 เลือกรายการด้านบนเพื่อดูสถานะ
-</div>
-{% endif %}
-
-</div>
-
-<!-- 🔥 JS FILTER -->
 <script>
-const searchInput = document.getElementById("searchInput");
-const items = document.querySelectorAll(".order-item");
-const noResult = document.getElementById("noResult");
+function done(id){
+    if(!confirm("จัดส่งแล้วใช่ไหม?")) return;
 
-searchInput.addEventListener("keyup", function() {
-    let value = this.value.toLowerCase();
-    let found = false;
+    fetch('/delivery/done/' + id + '/', {
+        method:'POST',
+        headers:{'X-CSRFToken': getC('csrftoken')}
+    })
+    .then(r=>r.json())
+    .then(d=>{
+        if(d.ok){
+            document.getElementById('r'+id).remove();
+        }
+    })
+}
 
-    items.forEach(item => {
-        let text = item.innerText.toLowerCase();
-
-        if (text.includes(value)) {
-            item.parentElement.style.display = "block";
-            found = true;
-        } else {
-            item.parentElement.style.display = "none";
+function getC(n){
+    let v=null;
+    document.cookie.split(';').forEach(c=>{
+        c=c.trim();
+        if(c.startsWith(n+'=')){
+            v=decodeURIComponent(c.substring(n.length+1));
         }
     });
-
-    noResult.style.display = found ? "none" : "block";
-});
+    return v;
+}
 </script>
 
 {% endblock %}

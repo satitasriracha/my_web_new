@@ -560,10 +560,12 @@
 </div>
 
 <!-- ฟอร์ม -->
-<form method="POST" action="{% url 'myapp:add_sale' %}" id="sale-form">
-  {% csrf_token %}
+<!-- <form method="POST" action="{% url 'myapp:add_sale' %}" id="sale-form"> -->
+<form method="POST" action="{% url 'myapp:sale_preview' %}" id="sale-form">
+{% csrf_token %}
 
-  <div class="row mb-3">
+
+  <!-- <div class="row mb-3">
     <div class="col-md-4">
       <label>รหัสการขาย</label>
       <input class="form-control" type="text" name="sale_code" value="{{ preview_code }}" readonly />
@@ -594,81 +596,81 @@
     <div class="col-md-6">
       <input type="hidden" name="status" value="4" />
     </div>
-  </div>
+  </div> -->
 
-  <!-- ตารางสินค้า -->
-  <div class="table-wrap no-frame">
-    <h3>สินค้า</h3>
-    <div class="row">
-      {% for product in products %}
-      <div class="col-md-3">
-        <div class="product-card">
-          <img src="{{ product.image.url|default:'/static/no-image.png' }}" alt="{{ product.product_name }}" />
-          <div class="p-2">
-            <div class="product-code">รหัส: {{ product.product_id }}</div>
-            <h6>{{ product.product_name }}</h6>
-            <button type="button" class="variant-btn"
-              onclick="addToCart('{{ product.product_id }}','{{ product.product_name }}','{{ product.price }}','{{ product.weight }}')">
-              {{ product.weight|floatformat:"g" }} กก. - {{ product.price|floatformat:"g" }} ฿
-            </button>
-          </div>
+<!-- ตารางสินค้า -->
+<div class="table-wrap no-frame">
+  <h3>สินค้า</h3>
+  <div class="row">
+    {% for product in products %}
+    <div class="col-md-3">
+      <div class="product-card">
+        <img src="{{ product.image.url|default:'/static/no-image.png' }}" alt="{{ product.product_name }}" />
+        <div class="p-2">
+          <div class="product-code">รหัส: {{ product.product_id }}</div>
+          <h6>{{ product.product_name }}</h6>
+          <button type="button" class="variant-btn"
+            onclick="addToCart('{{ product.product_id }}','{{ product.product_name }}','{{ product.price }}','{{ product.weight }}')">
+            {{ product.weight|floatformat:"g" }} กก. - {{ product.price|floatformat:"g" }} ฿
+          </button>
         </div>
       </div>
-      {% endfor %}
     </div>
+    {% endfor %}
   </div>
+</div>
 
-  <!-- ตะกร้า -->
-  <div class="table-wrap no-frame mt-3">
-    <h3>รายการขายสินค้า</h3>
-    <table class="flat" id="cart-table">
-      <thead>
-        <tr>
-          <th>รหัสสินค้า</th>
-          <th>ชื่อสินค้า</th>
-          <th>น้ำหนัก (กก.)</th>
-          <th>ราคา (บาท)</th>
-          <th>จำนวน (ถุง)</th>
-          <th>รวมเป็นเงิน (บาท)</th>
-          <th>&nbsp;</th>
-        </tr>
-      </thead>
-      <tbody id="cart-body">
-        <tr>
-          <td colspan="7" class="text-center text-muted">ยังไม่มีสินค้าในตะกร้า</td>
-        </tr>
-      </tbody>
-      <tfoot>
-        <tr>
-          <td colspan="4" class="text-end"><strong>รวมเป็นเงิน</strong></td>
-          <td id="cart-subtotal">0</td>
-          <td></td>
-        </tr>
-        <tr>
-          <td colspan="4" class="text-end"><strong>รวมค่าขนส่ง</strong></td>
-          <td id="cart-shipping">0</td>
-          <td></td>
-        </tr>
-        <tr>
-          <td colspan="4" class="text-end"><strong>รวมทั้งสิ้น</strong></td>
-          <td id="cart-grandtotal"><strong>0</strong></td>
-          <td></td>
-        </tr>
-      </tfoot>
-    </table>
-  </div>
+<!-- ตะกร้า -->
+<div class="table-wrap no-frame mt-3">
+  <h3>รายการขายสินค้า</h3>
+  <table class="flat" id="cart-table">
+    <thead>
+      <tr>
+        <th>รหัสสินค้า</th>
+        <th>ชื่อสินค้า</th>
+        <th>น้ำหนัก (กก.)</th>
+        <th>ราคา (บาท)</th>
+        <th>จำนวน (ถุง)</th>
+        <th>เป็นเงิน (บาท)</th>
+        <th>&nbsp;</th>
+      </tr>
+    </thead>
+    <tbody id="cart-body">
+      <tr>
+        <td colspan="7" class="text-center text-muted">ยังไม่มีสินค้าในตะกร้า</td>
+      </tr>
+    </tbody>
+    <tfoot>
+      <tr>
+        <td colspan="5" class="text-end"><strong>รวมเป็นเงิน</strong></td>
+        <td id="cart-subtotal">0</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td colspan="5" class="text-end"><strong>รวมค่าขนส่ง</strong></td>
+        <td id="cart-shipping">0</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td colspan="5" class="text-end"><strong>รวมทั้งสิ้น</strong></td>
+        <td id="cart-grandtotal"><strong>0</strong></td>
+        <td></td>
+      </tr>
+    </tfoot>
+  </table>
+</div>
 
-  <div class="toolbar-btm">
-    <div></div>
-    <button type="submit" class="btn btn-primary">✅ ยืนยันการขาย</button>
-  </div>
+<div class="toolbar-btm">
+  <div></div>
+  <button type="submit" class="btn btn-primary">✅ ยืนยันการขาย</button>
+</div>
 
-  <!-- Hidden fields -->
-  <input type="hidden" name="items_json" id="items_json" />
-  <input type="hidden" id="shipping_cost" name="shipping_cost" />
-  <input type="hidden" id="cart-total" />
-  <input type="hidden" id="cart-count" />
-  <input type="hidden" id="cart-total-qty" />
+<!-- Hidden fields -->
+<input type="hidden" name="items_json" id="items_json" />
+<input type="hidden" id="shipping_cost" name="shipping_cost" />
+<input type="hidden" id="cart-total" />
+<input type="hidden" id="cart-count" />
+<input type="hidden" id="cart-total-qty" />
 </form>
 
 
@@ -1158,36 +1160,51 @@
       });
       return;
     }
-
     Swal.fire({
-      title: 'ยืนยันการขาย',
+      title: 'ไปหน้าสรุปคำสั่งซื้อ?',
       icon: 'question',
       showCancelButton: true,
-      confirmButtonText: 'ยืนยัน',
+      confirmButtonText: 'ไปต่อ',
       cancelButtonText: 'ยกเลิก'
     }).then((result) => {
 
       if (result.isConfirmed) {
-
         document.getElementById("items_json").value = JSON.stringify(cart);
-
-        generateReceipt();
-
-        setTimeout(() => {
-          window.print();
-
-          setTimeout(() => {
-            localStorage.removeItem("pos_cart");
-            e.target.submit();
-          }, 500);
-
-        }, 300);
-
+        e.target.submit(); // 👉 ไปหน้า preview
       }
 
     });
-
   });
+
+  // Swal.fire({
+  //   title: 'ยืนยันการขาย',
+  //   icon: 'question',
+  //   showCancelButton: true,
+  //   confirmButtonText: 'ยืนยัน',
+  //   cancelButtonText: 'ยกเลิก'
+  // }).then((result) => {
+
+  // if (result.isConfirmed) {
+
+  //   document.getElementById("items_json").value = JSON.stringify(cart);
+
+  //   generateReceipt();
+
+  //   setTimeout(() => {
+  //     window.print();
+
+  //     setTimeout(() => {
+  //       localStorage.removeItem("pos_cart");
+  //       e.target.submit();
+  //     }, 500);
+
+  //   }, 300);
+
+  //     }
+
+  //   });
+
+  // });
 
   /* ============================= */
   /* GENERATE RECEIPT */
