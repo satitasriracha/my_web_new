@@ -51,15 +51,16 @@ path("login/", views.login_view, name="login"),
     path("customers/<str:customer_id>/delete/", views.delete_customer, name="delete_customer"),
 
     # ====== POS ขายหน้าร้าน ======
-   path("sale/", views.sale_list, name="sale_list"),
+    path("sale/", views.sale_list, name="sale_list"),
     path("sale/save/", views.add_sale, name="add_sale"),
     path("receipt/<int:sale_id>/", views.sale_receipt, name="sale_receipt"),
+    path("sale-preview/", views.sale_preview, name="sale_preview"),
 # urls.py
 
 # urls.py
 path('delivery/', views.delivery_list, name='delivery_list'),
 path('delivery/create/', views.delivery_create, name='delivery_create'),
-
+path("confirm-order/", views.confirm_order_view, name="confirm_order"),
 # ✅ เพิ่มตัวนี้
 path('delivery/tracking/', views.delivery_tracking, name='delivery_tracking'),
 path('dashboard/', views.dashboard, name='dashboard'),
@@ -122,6 +123,8 @@ path('update-sale-status/<int:pk>/', views.update_sale_status, name='update_sale
     path("checkout/", views.checkout_view, name="checkout"),
     path('report/sales/', views.report_sales, name='report_sales'),
     
-    
+    path('pay/', views.pay_list, name='pay_list'),
+    path('pay/<int:id>/', views.pay_api),
+    path('pay/ok/<int:id>/', views.pay_ok),
 
 ]
