@@ -12,18 +12,19 @@
 </div>
 
 <!-- ✅ SweetAlert2 -->
+<!-- SweetAlert2 -->
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 {% if messages %}
-<script>
     {% for message in messages %}
+    <script>
         Swal.fire({
-            icon: '{% if "success" in message.tags %}success{% elif "error" in message.tags %}error{% else %}info{% endif %}',
-            title: '{{ message|escapejs }}',
+            icon: "{{ message.tags|escapejs }}",
+            title: "{{ message|escapejs }}",
             showConfirmButton: false,
             timer: 2500
         });
+    </script>
     {% endfor %}
-</script>
 {% endif %}
 {% endblock %}

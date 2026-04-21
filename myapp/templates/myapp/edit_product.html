@@ -91,15 +91,15 @@ document.getElementById("editProductForm").addEventListener("submit", function (
 
 <!-- ✅ แสดง SweetAlert2 เมื่อ Django ส่ง message มา -->
 {% if messages %}
-<script>
     {% for message in messages %}
+    <script>
         Swal.fire({
-            icon: '{% if "success" in message.tags %}success{% elif "error" in message.tags %}error{% else %}info{% endif %}',
-            title: '{{ message|escapejs }}',
+            icon: "{{ message.tags|escapejs }}",
+            title: "{{ message|escapejs }}",
             showConfirmButton: false,
             timer: 2000
         });
+    </script>
     {% endfor %}
-</script>
 {% endif %}
 {% endblock %}
