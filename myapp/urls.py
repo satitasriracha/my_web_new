@@ -55,6 +55,7 @@ path("login/", views.login_view, name="login"),
     path("sale/save/", views.add_sale, name="add_sale"),
     path("receipt/<int:sale_id>/", views.sale_receipt, name="sale_receipt"),
     path("sale-preview/", views.sale_preview, name="sale_preview"),
+    
 # urls.py
 
 # urls.py

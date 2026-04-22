@@ -4,251 +4,273 @@
 {% block content %}
 
 <style>
-body {
-    background: #fff6ef;
-}
-
-/* 🔥 wrapper กันล้น */
-#receipt-area {
-    padding: 0 15px;
-}
-
-/* 🔥 กล่องหลัก */
-.preview-box {
-    max-width: 720px;
-    width: 100%;
-    margin: 40px auto;
-    background: #fff;
-    padding: 25px;
-    border-radius: 16px;
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
-    box-sizing: border-box;
-}
-
-/* 🔥 title */
-.title {
-    text-align: center;
-    font-size: 26px;
-    font-weight: bold;
-    color: #ff6a00;
-    margin-bottom: 20px;
-}
-
-/* 🔥 label */
-label {
-    font-weight: 600;
-    color: #555;
-}
-
-/* 🔥 input */
-input, select {
-    border-radius: 10px !important;
-    border: 1px solid #eee !important;
-    transition: 0.2s;
-}
-
-input:focus, select:focus {
-    border-color: #ff914d !important;
-    box-shadow: 0 0 5px rgba(255, 145, 77, 0.3);
-}
-
-/* 🔥 divider */
-.divider {
-    border-top: 1px dashed #ffb38a;
-    margin: 20px 0;
-}
-
-/* 🔥 table */
-table {
-    width: 100%;
-    font-size: 15px;
-}
-
-th {
-    color: #ff6a00;
-}
-
-tbody tr:hover {
-    background: #fff4ec;
-}
-
-/* 🔥 summary */
-.summary div {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 6px;
-}
-
-.total {
-    font-size: 20px;
-    font-weight: bold;
-    color: #ff3c00;
-}
-
-/* 🔥 buttons */
-.btn-zone {
-    text-align: center;
-    margin-top: 20px;
-}
-
-.btn {
-    padding: 10px 18px;
-    border-radius: 10px;
-    font-weight: bold;
-}
-
-.btn-success {
-    background: linear-gradient(45deg, #28a745, #34d058);
-    border: none;
-}
-
-.btn-secondary {
-    background: #ddd;
-}
-
-/* 🔥 print */
-@media print {
-    body * {
-        visibility: hidden;
+    body {
+        background: #fff6ef;
     }
 
-    #receipt-area,
-    #receipt-area * {
-        visibility: visible;
-    }
-
+    /* 🔥 wrapper กันล้น */
     #receipt-area {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
+        padding: 0 15px;
     }
 
-    .btn-zone {
-        display: none;
+    /* 🔥 กล่องหลัก */
+    .preview-box {
+        max-width: 720px;
+        width: 100%;
+        margin: 40px auto;
+        background: #fff;
+        padding: 25px;
+        border-radius: 16px;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+        box-sizing: border-box;
     }
-}
+
+    /* 🔥 title */
+    .title {
+        text-align: center;
+        font-size: 26px;
+        font-weight: bold;
+        color: #ff6a00;
+        margin-bottom: 20px;
+    }
+
+    /* 🔥 label */
+    label {
+        font-weight: 600;
+        color: #555;
+    }
+
+    /* 🔥 input */
+    input,
+    select {
+        border-radius: 10px !important;
+        border: 1px solid #eee !important;
+        transition: 0.2s;
+    }
+
+    input:focus,
+    select:focus {
+        border-color: #ff914d !important;
+        box-shadow: 0 0 5px rgba(255, 145, 77, 0.3);
+    }
+
+    /* 🔥 divider */
+    .divider {
+        border-top: 1px dashed #ffb38a;
+        margin: 20px 0;
+    }
+
+    /* 🔥 table */
+    table {
+        width: 100%;
+        font-size: 15px;
+    }
+
+    th {
+        color: #ff6a00;
+    }
+
+    tbody tr:hover {
+        background: #fff4ec;
+    }
+
+    /* 🔥 summary */
+    .summary div {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 6px;
+    }
+
+    .total {
+        font-size: 20px;
+        font-weight: bold;
+        color: #ff3c00;
+    }
+
+    /* 🔥 buttons */
+    .btn-zone {
+        text-align: center;
+        margin-top: 20px;
+    }
+
+    .btn {
+        padding: 10px 18px;
+        border-radius: 10px;
+        font-weight: bold;
+    }
+
+    .btn-success {
+        background: linear-gradient(45deg, #28a745, #34d058);
+        border: none;
+    }
+
+    .btn-secondary {
+        background: #ddd;
+    }
+
+    /* 🔥 print */
+    @media print {
+        body * {
+            visibility: hidden;
+        }
+
+        #receipt-area,
+        #receipt-area * {
+            visibility: visible;
+        }
+
+        #receipt-area {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+        }
+
+        .btn-zone {
+            display: none;
+        }
+    }
 </style>
 
 <div id="receipt-area">
-<div class="preview-box">
+    <div class="preview-box">
 
-    <div class="title">🧾 สรุปคำสั่งซื้อ</div>
+        <div class="title">🧾 สรุปคำสั่งซื้อ</div>
 
-    <!-- 🔥 ROW 1 -->
-    <div class="row mb-3">
+        <!-- 🔥 ROW 1 -->
+        <div class="row mb-3">
 
-        <div class="col-md-4 col-12 mb-2">
-            <label>รหัสการขาย</label>
-            <input class="form-control" value="{{ sale_code }}" readonly>
+            <div class="col-md-4 col-12 mb-2">
+                <label>รหัสการขาย</label>
+                <input class="form-control" value="{{ sale_code }}" readonly>
+            </div>
+
+            <div class="col-md-4 col-12 mb-2">
+                <label>วันที่ขาย</label>
+                <input type="date" name="sale_date" class="form-control" value="{{ sale_date }}">
+            </div>
+
+            <div class="col-md-4 col-12 mb-2">
+                <label>พนักงาน</label>
+                <input class="form-control" value="{{ request.user.username }}" readonly>
+            </div>
+
         </div>
 
-        <div class="col-md-4 col-12 mb-2">
-            <label>วันที่ขาย</label>
-            <input type="date" name="sale_date" class="form-control" value="{{ sale_date }}">
+        <!-- 🔥 ROW 2 -->
+        <div class="row mb-3">
+
+            <div class="col-md-4 col-12 mb-2">
+                <label>ประเภทลูกค้า</label>
+                <select id="customer_type" name="customer_type" class="form-control" onchange="toggleCustomer()">
+                    <option value="ทั่วไป">ลูกค้าทั่วไป</option>
+                    <option value="สมาชิก">ลูกค้าสมาชิก</option>
+                </select>
+            </div>
+
+            <div class="col-md-4 col-12 mb-2">
+                <label>รหัสลูกค้า</label>
+                <input id="customer_id" name="customer_id" class="form-control" value="000">
+            </div>
+
+            <div class="col-md-4 col-12 mb-2">
+                <label>ชื่อลูกค้า</label>
+                <input id="customer_name" name="customer_name" class="form-control" value="ลูกค้าทั่วไป">
+            </div>
+
         </div>
 
-        <div class="col-md-4 col-12 mb-2">
-            <label>พนักงาน</label>
-            <input class="form-control" value="{{ request.user.username }}" readonly>
+        <div class="divider"></div>
+
+        <!-- 🔥 TABLE -->
+        <table>
+            <thead>
+                <tr>
+                    <th>สินค้า</th>
+                    <th>จำนวน</th>
+                    <th class="text-right">ราคา</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for i in items %}
+                <tr>
+                    <td>{{ i.name }}</td>
+                    <td>x{{ i.qty }}</td>
+                    <td class="text-right">{{ i.total }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <div class="divider"></div>
+
+        <!-- 🔥 SUMMARY -->
+        <div class="summary">
+            <div><span>รวมสินค้า</span><span>{{ subtotal }} บาท</span></div>
+            <div><span>ค่าขนส่ง</span><span>{{ shipping }} บาท</span></div>
+            <div class="total"><span>รวมทั้งหมด</span><span>{{ grand_total }} บาท</span></div>
         </div>
+
+        <!-- 🔥 FORM -->
+        <form method="POST" action="{% url 'myapp:add_sale' %}">
+            {% csrf_token %}
+
+            <!-- 🔥 ย้ายมาไว้ตรงนี้ -->
+            <input type="hidden" name="customer_id" value="{{ request.POST.customer_id|default:'000' }}">
+
+            <input type="hidden" name="items_json" id="items_json">
+            <input type="hidden" name="shipping_cost" value="{{ shipping }}">
+            <input type="hidden" name="sale_code" value="{{ sale_code }}">
+            <input type="hidden" name="sale_date" value="{{ sale_date }}">
+            <input type="hidden" name="employee" value="{{ request.user.username }}">
+            <div class="btn-zone">
+                <a href="{% url 'myapp:sale_list' %}" class="btn btn-secondary"> ย้อนกลับ</a>
+                <button type="submit" class="btn btn-success"> ยืนยันการขาย </button>
+            </div>
+        </form>
 
     </div>
-
-    <!-- 🔥 ROW 2 -->
-    <div class="row mb-3">
-
-        <div class="col-md-4 col-12 mb-2">
-            <label>ประเภทลูกค้า</label>
-            <select id="customer_type" name="customer_type" class="form-control" onchange="toggleCustomer()">
-                <option value="ทั่วไป">ลูกค้าทั่วไป</option>
-                <option value="สมาชิก">ลูกค้าสมาชิก</option>
-            </select>
-        </div>
-
-        <div class="col-md-4 col-12 mb-2">
-            <label>รหัสลูกค้า</label>
-            <input id="customer_id" name="customer_id" class="form-control" value="000">
-        </div>
-
-        <div class="col-md-4 col-12 mb-2">
-            <label>ชื่อลูกค้า</label>
-            <input id="customer_name" name="customer_name" class="form-control" value="ลูกค้าทั่วไป">
-        </div>
-
-    </div>
-
-    <div class="divider"></div>
-
-    <!-- 🔥 TABLE -->
-    <table>
-        <thead>
-            <tr>
-                <th>สินค้า</th>
-                <th>จำนวน</th>
-                <th class="text-right">ราคา</th>
-            </tr>
-        </thead>
-
-        <tbody>
-            {% for i in items %}
-            <tr>
-                <td>{{ i.name }}</td>
-                <td>x{{ i.qty }}</td>
-                <td class="text-right">{{ i.total }}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-
-    <div class="divider"></div>
-
-    <!-- 🔥 SUMMARY -->
-    <div class="summary">
-        <div><span>รวมสินค้า</span><span>{{ subtotal }} บาท</span></div>
-        <div><span>ค่าขนส่ง</span><span>{{ shipping }} บาท</span></div>
-        <div class="total"><span>รวมทั้งหมด</span><span>{{ grand_total }} บาท</span></div>
-    </div>
-
-    <!-- 🔥 FORM -->
-    <form method="POST" action="{% url 'myapp:add_sale' %}">
-        {% csrf_token %}
-
-        <input type="hidden" name="items_json" value='{{ cart_json }}'>
-        <input type="hidden" name="shipping_cost" value="{{ shipping }}">
-        <input type="hidden" name="sale_code" value="{{ sale_code }}">
-        <input type="hidden" name="sale_date" value="{{ sale_date }}">
-        <input type="hidden" name="employee" value="{{ request.user.username }}">
-
-        <div class="btn-zone">
-            <button class="btn btn-success">✅ ยืนยันการขาย</button>
-            <a href="{% url 'myapp:sale_list' %}" class="btn btn-secondary">🔙 ย้อนกลับ</a>
-        </div>
-    </form>
-
-</div>
 </div>
 
 <script>
-function toggleCustomer() {
-    let type = document.getElementById("customer_type").value;
-    let id = document.getElementById("customer_id");
-    let name = document.getElementById("customer_name");
+    document.getElementById("items_json").value = '{{ cart_json|escapejs }}';
+    function toggleCustomer() {
+        let type = document.getElementById("customer_type").value;
+        let id = document.getElementById("customer_id");
+        let name = document.getElementById("customer_name");
 
-    if (type === "ทั่วไป") {
-        id.value = "000";
-        name.value = "ลูกค้าทั่วไป";
-        id.readOnly = true;
-        name.readOnly = true;
-    } else {
-        id.value = "";
-        name.value = "";
-        id.readOnly = false;
-        name.readOnly = false;
+        if (type === "ทั่วไป") {
+            id.value = "000";
+            name.value = "ลูกค้าทั่วไป";
+            id.readOnly = true;
+            name.readOnly = true;
+        } else {
+            id.value = "";
+            name.value = "";
+            id.readOnly = false;
+            name.readOnly = false;
+        }
     }
-}
 
-window.onload = toggleCustomer;
+    window.onload = toggleCustomer;
+</script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+    const params = new URLSearchParams(window.location.search);
+
+    if (params.get("success") === "1") {
+        Swal.fire({
+            icon: "success",
+            title: "สั่งซื้อสำเร็จ",
+            text: "บันทึกเรียบร้อยแล้ว",
+            timer: 2000,
+            showConfirmButton: false
+        });
+
+        window.history.replaceState({}, document.title, window.location.pathname);
+    }
 </script>
 
 {% endblock %}

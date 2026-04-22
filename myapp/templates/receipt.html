@@ -153,13 +153,18 @@ CHARCOAL HOME GREEN
 🖨 พิมพ์ใบเสร็จ
 </button>
 
-<a href="{% url 'sale_page' %}" class="btn btn-secondary">
+<a href="{% url 'myapp:sale_list' %}" class="btn btn-secondary">
 กลับหน้าขาย
 </a>
 
 </div>
 
 </div>
-
+<script>
+    window.onafterprint = function() {
+        localStorage.removeItem("pos_cart");
+        window.location.href = "{% url 'myapp:sale_list' %}";
+    };
+</script>
 </body>
 </html>
