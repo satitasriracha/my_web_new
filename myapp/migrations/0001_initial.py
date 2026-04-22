@@ -49,7 +49,7 @@ class Migration(migrations.Migration):
                 ('sale_code', models.CharField(blank=True, max_length=20, unique=True, verbose_name='รหัสการขาย')),
                 ('sale_date', models.DateField(auto_now_add=True, verbose_name='วันที่ขาย')),
                 ('shipping_fee', models.DecimalField(decimal_places=2, default=Decimal('0.00'), max_digits=8, verbose_name='ค่าขนส่ง')),
-                ('status', models.IntegerField(choices=[(0, 'สั่งซื้อสินค้า'), (1, 'แจ้งชำระเงิน'), (2, 'ยืนยันการโอน'), (3, 'รอการจัดส่ง'), (4, 'จัดส่งเสร็จสิ้น')], default=0, verbose_name='สถานะ')),
+                ('status', models.IntegerField(choices=[(0, 'สั่งซื้อสินค้า'), (1, 'แจ้งชำระเงิน'), (2, 'ยืนยันการโอน'), (3, 'รอการจัดส่ง'), (4, 'จัดส่งสินค้าเสร็จสิ้น')], default=0, verbose_name='สถานะ')),
                 ('note', models.TextField(blank=True, null=True, verbose_name='หมายเหตุ')),
                 ('customer', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='myapp.customer', verbose_name='ลูกค้า')),
                 ('employee', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='myapp.employee', verbose_name='พนักงาน')),

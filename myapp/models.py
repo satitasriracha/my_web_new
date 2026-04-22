@@ -24,30 +24,35 @@ class PasswordResetToken(models.Model):
 
 class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="profile")
-    phone = models.CharField(
-        max_length=20, blank=True, null=True, verbose_name="เบอร์โทร"
-    )
-    address = models.TextField(blank=True, null=True, verbose_name="ที่อยู่")
+    
+    user_code = models.CharField(max_length=10, unique=True, null=True, blank=True)  # ✅ เพิ่มตรงนี้
+
+    phone = models.CharField(max_length=20, blank=True, null=True)
+    address = models.TextField(blank=True, null=True)
+
     position = models.CharField(
         max_length=20,
         choices=[("employee", "พนักงาน"), ("admin", "แอดมิน"), ("owner", "เจ้าของกิจการ")],
         default="employee",
-        verbose_name="ตำแหน่ง",
     )
 
     def __str__(self):
-        return f"{self.user.username} ({self.position})"
+        return f"{self.user_code} - {self.user.get_full_name()}"
 
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
 
-        # ✅ sync position กับ groups
+    # ✅ generate หลังจากมี user.id แล้ว
+        if not self.user_code:
+            self.user_code = f"USR-{self.user.id:03d}"
+            super().save(update_fields=["user_code"])
+
+        super().save(*args, **kwargs)
+
+    # ✅ sync group (ของเดิมคุณ)
         if self.position:
-            # สร้าง group ถ้าไม่มี
             group, created = Group.objects.get_or_create(name=self.position)
-            # ล้าง group เก่าออกก่อน
             self.user.groups.clear()
-            # เพิ่ม group ใหม่
             self.user.groups.add(group)
 
 
@@ -181,14 +186,6 @@ class Product(models.Model):
         verbose_name = "สินค้า"
         verbose_name_plural = "สินค้า"
 
-class CartItem(models.Model):
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    qty = models.PositiveIntegerField(default=1)
-    session_key = models.CharField(max_length=40, null=True, blank=True)
-
-    @property
-    def subtotal(self):
-        return self.product.price * self.qty
 
 
 # ==================== ProductReceive ====================
@@ -447,8 +444,13 @@ class Delivery(models.Model):
     sale = models.ForeignKey(Sale, on_delete=models.CASCADE, related_name="deliveries")
     delivery_date = models.DateField("วันที่จัดส่ง", auto_now_add=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
-    tracking_number = models.CharField("หมายเลขพัสดุ", max_length=100)
-    company = models.CharField("บริษัทขนส่ง", max_length=100, default=None)
+
+    # ✅ เพิ่มตรงนี้
+    address = models.TextField("ที่อยู่จัดส่ง", blank=True, null=True)
+    status = models.CharField("สถานะ", max_length=50, default="pending")
+
+    tracking_number = models.CharField("หมายเลขพัสดุ", max_length=100, blank=True)
+    company = models.CharField("บริษัทขนส่ง", max_length=100, blank=True)
 
     def save(self, *args, **kwargs):
         if not self.delivery_id:
@@ -521,13 +523,10 @@ class ShippingRate(models.Model):
 
 # ==================== CartItem ====================
 class CartItem(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="cart_items")
+    customer = models.ForeignKey(Customer, on_delete=models.CASCADE, null=True, blank=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    qty = models.PositiveIntegerField(default=1)
+    quantity = models.PositiveIntegerField(default=1)
 
-    @property
     def subtotal(self):
-        return self.product.price * self.qty
-
-    def __str__(self):
-        return f"{self.product.product_name} x {self.qty}"
+        return self.product.price * self.quantity

@@ -6,23 +6,24 @@ app_name = "myapp"
 
 urlpatterns = [
 
-    # หน้า Home
+    # ====== Home ======
     path("", views.home, name="root_home"),
+  
     path("home/", views.home, name="home"),
-
-    # สินค้า
+# path('add_to_cart/<str:product_id>/', views.add_to_cart, name='add_to_cart'),
+path("login/", views.login_view, name="login"),
+    # ====== Shop ======
     path("shop/products/", views.products, name="products"),
 
-   # ====== 🛒 ตะกร้าสินค้า ======
+    # ====== Cart ======
     path("cart/", views.cart_view, name="cart"),
     path("cart/add/<str:pk>/", views.add_to_cart, name="add_to_cart"),
     path("cart/remove/<slug:pk>/", views.remove_from_cart, name="remove_from_cart"),
     path("cart/update/<slug:pk>/", views.update_cart, name="update_cart"),
 
-
-    # ====== Auth ======
+    # ====== Authentication ======
     path("register/", views.register, name="register"),
-    path("login/", views.login_view, name="login"),
+    
     path("logout/", views.logout_view, name="logout"),
     path("forgot/", views.forgot_password_view, name="forgot_password"),
 
@@ -49,9 +50,25 @@ urlpatterns = [
     path("customers/<str:customer_id>/edit/", views.edit_customer, name="edit_customer"),
     path("customers/<str:customer_id>/delete/", views.delete_customer, name="delete_customer"),
 
-    # ====== Sales ======
+    # ====== POS ขายหน้าร้าน ======
+    path("sale/", views.sale_list, name="sale_list"),
+    path("sale/save/", views.add_sale, name="add_sale"),
+    path("receipt/<int:sale_id>/", views.sale_receipt, name="sale_receipt"),
+    path("sale-preview/", views.sale_preview, name="sale_preview"),
+# urls.py
+
+# urls.py
+path('delivery/', views.delivery_list, name='delivery_list'),
+path('delivery/create/', views.delivery_create, name='delivery_create'),
+path("confirm-order/", views.confirm_order_view, name="confirm_order"),
+# ✅ เพิ่มตัวนี้
+path('delivery/tracking/', views.delivery_tracking, name='delivery_tracking'),
+path('dashboard/', views.dashboard, name='dashboard'),
+path('delivery/<int:delivery_id>/edit/', views.edit_delivery, name='edit_delivery'),
+path('delivery/<int:delivery_id>/delete/', views.delete_delivery, name='delete_delivery'),
+path('update-sale-status/<int:pk>/', views.update_sale_status, name='update_sale_status'),
+    # ====== Sales History ======
     path("sales/", views.sale_list, name="sale_list"),
-    path("sale/add/", views.add_sale, name="add_sale"),
     path("sales/<str:sale_id>/edit/", views.edit_sale, name="edit_sale"),
     path("sales/<str:sale_id>/delete/", views.delete_sale, name="delete_sale"),
 
@@ -67,6 +84,10 @@ urlpatterns = [
     path("product_receive/add/", views.add_product_receive, name="add_product_receive"),
     path("receive/history/", views.product_receive_history, name="product_receive_history"),
     path("product_receive/confirm/", views.confirm_receive, name="confirm_receive"),
+
+    # ====== Orders ======
+    path("orders/", views.customer_orders, name="customer_orders"),
+    path("invoice/<int:sale_id>/", views.invoice_view, name="invoice"),
 
     # ====== Payment ======
     path("payment/", views.payment_list, name="payment_list"),
@@ -98,8 +119,12 @@ urlpatterns = [
     path("shipping/<int:pk>/edit/", views.shipping_rate_edit, name="shipping_rate_edit"),
     path("shipping/<int:pk>/delete/", views.shipping_rate_delete, name="shipping_rate_delete"),
 
-    #=========ชำระเงิน===========
+    # ====== Checkout ======
     path("checkout/", views.checkout_view, name="checkout"),
-
+    path('report/sales/', views.report_sales, name='report_sales'),
+    
+    path('pay/', views.pay_list, name='pay_list'),
+    path('pay/<int:id>/', views.pay_api),
+    path('pay/ok/<int:id>/', views.pay_ok),
 
 ]

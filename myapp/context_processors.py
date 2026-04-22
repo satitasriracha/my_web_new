@@ -14,8 +14,22 @@ def customer_context(request):
         "customer_name": request.session.get("customer_name", None)
     }
 
+# def cart_count(request):
+#     cart = request.session.get("cart", {})
+#     return {
+#         "cart_count": sum(cart.values())
+#     }
+
 def cart_count(request):
-    cart = request.session.get("cart", {})
-    return {
-        "cart_count": sum(cart.values())
-    }
+    cart_json = request.session.get("cart")
+
+    if not cart_json:
+        return {"cart_count": 0}
+
+    try:
+        cart = json.loads(cart_json)  # 🔥 แปลงก่อน
+        count = sum(item["qty"] for item in cart)
+    except:
+        count = 0
+
+    return {"cart_count": count}

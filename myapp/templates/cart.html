@@ -3,443 +3,553 @@
 {% block title %}ตะกร้าสินค้า - CHARCOAL HOME GREEN{% endblock %}
 
 {% block content %}
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
-<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet" />
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <style>
-  /* ===== Layout ===== */
-  .cart-container {
-    max-width: 1200px;
+  :root {
+    --main: #a10000;
+    --main-hover: #c40000;
+    --line: #e9ecef;
+    --soft: #f8f9fa;
+  }
+
+  .cart-wrapper {
+    max-width: 1280px;
     margin: 40px auto;
+    padding: 0 15px;
+  }
+
+  .cart-header {
     display: flex;
-    gap: 40px
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 20px;
   }
 
-  .cart-items {
-    flex: 2
+  .cart-title {
+    font-size: 28px;
+    font-weight: 700;
+    margin: 0;
   }
 
-  .summary-box {
-    flex: 1
+  .action-group {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
   }
 
-  /* ===== Table ===== */
+  .btn-main,
+  .btn-light2 {
+    border: none;
+    padding: 11px 18px;
+    border-radius: 10px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: .2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .btn-main {
+    background: var(--main);
+    color: #fff;
+  }
+
+  .btn-main:hover {
+    background: var(--main-hover);
+    color: #fff;
+  }
+
+  .btn-light2 {
+    background: #fff;
+    border: 1px solid #ddd;
+    color: #222;
+  }
+
+  .btn-light2:hover {
+    background: #f2f2f2;
+    color: #111;
+  }
+
+  .cart-box {
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, .04);
+  }
+
   .cart-table {
     width: 100%;
-    border-collapse: collapse
+    border-collapse: collapse;
   }
 
   .cart-table thead th {
-    font-weight: 600;
-    padding: 14px 12px;
-    border-bottom: 2px solid #ddd;
-    background: #fff
-  }
-
-  .cart-table tbody tr {
-    border-bottom: 1px solid #eee
+    background: var(--soft);
+    padding: 16px 12px;
+    font-size: 15px;
+    font-weight: 700;
+    border-bottom: 1px solid var(--line);
   }
 
   .cart-table tbody td {
-    padding: 18px 12px;
-    vertical-align: middle
+    padding: 16px 12px;
+    border-bottom: 1px solid #f1f1f1;
+    vertical-align: middle;
+  }
+
+  .cart-table tbody tr:hover {
+    background: #fcfcfc;
   }
 
   .col-image {
-    width: 110px
-  }
-
-  .product-img {
-    width: 80px;
-    height: 100px;
-    object-fit: cover;
-    border-radius: 6px
-  }
-
-  .product-title {
-    font-weight: 600;
-    line-height: 1.3
-  }
-
-  .product-meta {
-    color: #6c757d;
-    font-size: .9rem
+    width: 110px;
   }
 
   .col-qty {
-    width: 120px;
-    text-align: center
+    width: 130px;
+    text-align: center;
   }
 
   .col-price {
-    width: 120px;
-    text-align: right
+    width: 140px;
+    text-align: right;
   }
 
   .col-subtotal {
-    width: 150px;
-    text-align: right
+    width: 160px;
+    text-align: right;
   }
 
   .col-remove {
-    width: 56px;
-    text-align: center
+    width: 70px;
+    text-align: center;
+  }
+
+  .product-wrap {
+    display: flex;
+    gap: 14px;
+    align-items: center;
+  }
+
+  .product-img {
+    width: 72px;
+    height: 88px;
+    object-fit: cover;
+    border-radius: 10px;
+    border: 1px solid #eee;
+  }
+
+  .product-title {
+    font-weight: 700;
+    font-size: 16px;
+    margin-bottom: 4px;
+  }
+
+  .product-meta {
+    color: #777;
+    font-size: 14px;
   }
 
   .qty-input {
-    width: 90px;
+    width: 85px;
     text-align: center;
-    margin: 0 auto
+    margin: auto;
+    border-radius: 8px;
   }
 
-  .price,
-  .subtotal {
-    font-variant-numeric: tabular-nums
+  .money {
+    font-weight: 600;
   }
 
   .remove-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 32px;
-    height: 32px;
+    width: 36px;
+    height: 36px;
+    border: none;
     border-radius: 50%;
     background: #fdecee;
-    border: 1px solid #f5c2c7;
     color: #b02a37;
-    cursor: pointer;
-    transition: all .15s
+    transition: .2s;
   }
 
   .remove-btn:hover {
     background: #dc3545;
-    border-color: #dc3545;
-    color: #fff
-  }
-
-  .remove-btn i {
-    font-size: 1rem;
-    line-height: 1
-  }
-
-  /* ===== Summary ===== */
-  .sum-card {
-    background: #fff;
-    border: 1px solid #eee;
-    border-radius: 8px;
-    padding: 18px
-  }
-
-  .sum-title {
-    font-weight: 700;
-    font-size: 1rem;
-    margin-bottom: 12px
-  }
-
-  .sum-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px 0;
-    border-bottom: 1px solid #f1f1f1;
-    font-size: .95rem
-  }
-
-  .sum-row:last-child {
-    border-bottom: 0
-  }
-
-  .sum-label {
-    color: #555
-  }
-
-  .sum-value {
-    font-variant-numeric: tabular-nums;
-    color: #111
-  }
-
-  .sum-total {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 12px 0 0;
-    font-weight: 700;
-    font-size: 1rem
-  }
-
-  .btn-checkout {
-    display: block;
-    width: 100%;
-    background: #a10000;
-    color: #fff;
-    padding: 12px;
-    margin-top: 16px;
-    border-radius: 6px;
-    font-weight: 600;
-    text-align: center;
-    text-decoration: none;
-    transition: .2s;
-  }
-
-  .btn-checkout:hover {
-    background: #c40000;
     color: #fff;
   }
 
-
-  .btn-continue {
-    width: 100%;
-    margin-top: 10px;
-    padding: 12px;
-    border: 1px solid #ddd;
+  .shipping-box {
+    margin-top: 30px;
     background: #fff;
-    font-weight: 500;
-    border-radius: 6px
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 20px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, .04);
   }
 
-  /* ===== ตารางอัตราค่าขนส่ง ===== */
+  .shipping-title {
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 15px;
+  }
+
   #shippingRateTable {
-    margin-top: 50px;
-    background: #fff;
-    border: 1px solid #eee;
-    border-radius: 8px
+    margin: 0;
   }
 
   #shippingRateTable th {
     background: #fff4eb;
-    color: #b35b00;
-    font-weight: bold;
-    text-align: center
+    color: #a85b00;
+    text-align: center;
   }
 
   #shippingRateTable td {
     text-align: center;
-    padding: 10px
-  }
-
-  #shippingRateTable tbody tr:nth-child(odd) {
-    background: #fffaf3
   }
 
   #shippingRateTable tr.active-rate {
     background: #ffecd6 !important;
-    font-weight: bold;
-    border-left: 4px solid #ff9800
+    font-weight: 700;
   }
 
-  @media (max-width:768px) {
+  .empty-box {
+    background: #fff;
+    border: 1px dashed #ddd;
+    border-radius: 16px;
+    padding: 50px 20px;
+    text-align: center;
+    color: #777;
+  }
 
-    .col-price,
-    .col-subtotal {
-      width: 90px
+  .bottom-actions {
+    margin-top: 22px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  @media(max-width:991px) {
+    .cart-title {
+      font-size: 24px;
+    }
+  }
+
+  @media(max-width:768px) {
+    .cart-table {
+      min-width: 900px;
     }
 
-    .col-qty {
-      width: 100px
+    .cart-box {
+      overflow-x: auto;
     }
 
-    .product-title {
-      white-space: normal
+    .cart-header,
+    .bottom-actions {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .action-group {
+      width: 100%;
+    }
+
+    .action-group a,
+    .bottom-actions a {
+      justify-content: center;
     }
   }
 </style>
 
-<div class="cart-container">
-  <div class="cart-items">
-    <h4 class="mb-3">ตะกร้าสินค้า</h4>
+<div class="cart-wrapper">
 
-    {% if items %}
-    <table class="cart-table align-middle" id="cartTable">
+  <!-- Header -->
+  <div class="cart-header">
+    <h2 class="cart-title">
+      <i class="bi bi-cart3"></i> ตะกร้าสินค้า
+    </h2>
+
+    <div class="action-group">
+      <a href="{% url 'myapp:products' %}" class="btn-light2">
+        <i class="bi bi-bag-plus"></i> เลือกสินค้าเพิ่ม
+      </a>
+
+      {% if request.user.is_authenticated or request.session.customer_id %}
+      <a href="{% url 'myapp:confirm_order' %}" class="btn-main">
+        <i class="bi bi-credit-card"></i> ชำระเงิน
+      </a>
+      {% else %}
+      <a href="#" class="btn-main" id="btnCheckout">
+        <i class="bi bi-box-arrow-in-right"></i> ชำระเงิน
+      </a>
+      {% endif %}
+    </div>
+  </div>
+
+  {% if items %}
+  <div class="cart-box">
+    <table class="cart-table" id="cartTable">
       <thead>
         <tr>
           <th class="col-image">รูป</th>
-          <th>รายละเอียดสินค้า</th>
+          <th>สินค้า</th>
           <th class="col-qty">จำนวน</th>
-          <th class="col-price">ราคา (บาท)</th>
-          <th class="col-subtotal">รวมเป็นเงิน (บาท)</th>
-          <th class="col-remove"></th>
+          <th class="col-price">ราคา</th>
+          <th class="col-subtotal">รวม</th>
+          <th class="col-remove">ลบ</th>
         </tr>
       </thead>
       <tbody>
         {% for item in items %}
-        <tr class="cart-row" data-product-id="{{ item.product.pk }}" data-price="{{ item.product.price|default:0 }}"
-          data-weight-per-unit="{{ item.weight|default:0 }}"
-          data-update-url="{% url 'myapp:update_cart' item.product.pk %}"
-          data-remove-url="{% url 'myapp:remove_from_cart' item.product.pk %}">
+        <tr class="cart-row" data-price="{{ item.price }}" data-weight-per-unit="{{ item.weight }}"
+          data-update-url="{% url 'myapp:update_cart' item.id %}"
+          data-remove-url="{% url 'myapp:remove_from_cart' item.id %}">
+
           <td class="col-image">
             <img class="product-img"
-              src="{% if item.product.image %}{{ item.product.image.url }}{% else %}{% static 'images/uka.jpg' %}{% endif %}"
-              alt="{{ item.product.product_name }}">
+              src="{% if item.product.image %}{{ item.product.image.url }}{% else %}{% static 'images/uka.jpg' %}{% endif %}">
           </td>
+
           <td>
             <div class="product-title">{{ item.product.product_name }}</div>
-            <div class="product-meta">น้ำหนัก: {{ item.weight|default:"-" }} กิโลกรัม</div>
+            <div class="product-meta">
+              น้ำหนัก {{ item.weight|default:"0" }} กก.
+            </div>
           </td>
+
           <td class="col-qty">
-            <input type="number" class="form-control qty-input" value="{{ item.qty }}" min="0" inputmode="numeric">
+            <input type="number" class="form-control qty-input" min="0" value="{{ item.qty }}">
           </td>
-          <td class="col-price price"><span class="cell-price">{{ item.product.price }}</span></td>
-          <td class="col-subtotal subtotal"><span class="cell-subtotal">{{ item.subtotal }}</span></td>
+
+          <td class="col-price money">
+            <span class="cell-price">{{ item.product.price }}</span> บาท
+          </td>
+
+          <td class="col-subtotal money">
+            <span class="cell-subtotal">{{ item.subtotal }}</span> บาท
+          </td>
+
           <td class="col-remove">
-            <button class="remove-btn" title="ลบสินค้า" aria-label="ลบสินค้า">
-              <i class="bi bi-x-lg"></i>
+            <button class="remove-btn">
+              <i class="bi bi-trash"></i>
             </button>
           </td>
+
         </tr>
         {% endfor %}
       </tbody>
     </table>
-    {% else %}
-    <div class="text-center text-muted p-4">ยังไม่มีสินค้าในตะกร้า</div>
-    {% endif %}
   </div>
-
-  <div class="summary-box">
-    <div class="sum-card">
-      <div class="sum-title">ยอดรวม</div>
-
-      <div class="sum-row">
-        <span class="sum-label">ยอดรวมสินค้า</span>
-        <span class="sum-value"><span id="sumSubtotal">{{ total }}</span> บาท</span>
-      </div>
-
-      <div class="sum-row">
-        <span class="sum-label">ค่าจัดส่ง</span>
-        <span class="sum-value"><span id="sumShipping">{{ shipping_fee|default:"0" }}</span> บาท</span>
-      </div>
-
-      <div class="sum-row">
-        <span class="sum-label">น้ำหนักรวมทั้งหมด</span>
-        <span class="sum-value"><span id="sumWeight">{{ total_weight|default:"0" }}</span> กิโลกรัม</span>
-      </div>
-
-      <div class="sum-total">
-        <span>ยอดรวมทั้งหมด</span>
-        <span><span id="sumGrand">{{ grand_total|default:total }}</span> บาท</span>
-      </div>
+  {% else %}
+  <div class="empty-box">
+    <i class="bi bi-cart-x fs-1 d-block mb-3"></i>
+    ยังไม่มีสินค้าในตะกร้า
+    <div class="mt-3">
+      <a href="{% url 'myapp:products' %}" class="btn-main">
+        เลือกสินค้า
+      </a>
     </div>
-
-    <a href="{% url 'myapp:checkout' %}" class="btn-checkout">
-      ชำระเงิน
-    </a>
-
-    <a href="{% url 'myapp:products' %}" class="btn btn-continue">เลือกสินค้าเพิ่มเติม</a>
   </div>
-</div>
+  {% endif %}
+
+  <!-- Shipping -->
+  <div class="shipping-box">
+    <div class="shipping-title">📦 อัตราค่าขนส่งทั้งหมด</div>
+
+    <table class="table table-bordered align-middle" id="shippingRateTable">
+      <thead>
+        <tr>
+          <th>น้ำหนักไม่เกิน (กก.)</th>
+          <th>ค่าจัดส่ง (บาท)</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+
+    <p id="activeRateInfo" class="mt-3 text-muted mb-0"></p>
+  </div>
+
+  <!-- Bottom Buttons -->
 
 
-<div class="container mt-5">
-  <h5 class="mb-3">📦 อัตราค่าขนส่งทั้งหมด</h5>
-  <table class="table table-bordered" id="shippingRateTable">
-    <thead>
-      <tr>
-        <th>น้ำหนัก (กก. ไม่เกิน)</th>
-        <th>อัตราค่าขนส่ง (บาท)</th>
-      </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
-  <p id="activeRateInfo" class="mt-2 text-muted"></p>
 </div>
 
 <script type="application/json" id="shippingRatesJSON">
-  {{ shipping_rates|default:"[]"|safe }}
+{{ shipping_rates|default:"[]"|safe }}
 </script>
 
 <script>
-  const num = (v) => { if (v == null) return 0; if (typeof v === "number") return isFinite(v) ? v : 0; const s = String(v).replace(/[^\d.\-]/g, ""); const n = parseFloat(s); return isFinite(n) ? n : 0; }
-  const fmt = (n) => Number(n || 0).toLocaleString()
+  const num = v => {
+    const n = parseFloat(String(v || 0).replace(/[^\d.-]/g, ''));
+    return isFinite(n) ? n : 0;
+  }
+  const fmt = n => Number(n || 0).toLocaleString();
 
-  // โหลด JSON rates
-  let SHIPPING_RATES = []
-  try { SHIPPING_RATES = JSON.parse(document.getElementById("shippingRatesJSON").textContent || "[]") } catch (_) { SHIPPING_RATES = [] }
+  let SHIPPING_RATES = [];
+  try {
+    SHIPPING_RATES = JSON.parse(
+      document.getElementById("shippingRatesJSON").textContent || "[]"
+    );
+  } catch (e) { }
 
-  // คำนวณเรตที่ใช้อยู่
   function calcCurrentRate(totalWeight) {
-    if (!Array.isArray(SHIPPING_RATES) || SHIPPING_RATES.length === 0) return null
-    for (const r of SHIPPING_RATES) { if (totalWeight <= num(r.weight)) return r }
-    return SHIPPING_RATES[SHIPPING_RATES.length - 1]
+    if (!SHIPPING_RATES.length) return null;
+    for (const r of SHIPPING_RATES) {
+      if (totalWeight <= num(r.weight)) return r;
+    }
+    return SHIPPING_RATES[SHIPPING_RATES.length - 1];
   }
 
-  // แสดงตาราง + ไฮไลต์เรตปัจจุบัน
   function renderShippingRateTable(totalWeight = 0) {
-    const tbody = document.querySelector("#shippingRateTable tbody")
-    const info = document.getElementById("activeRateInfo")
-    if (!tbody) return
-    const current = calcCurrentRate(totalWeight)
-    if (!SHIPPING_RATES.length) {
-      tbody.innerHTML = `<tr><td colspan="2" class="text-center text-muted">ไม่มีข้อมูลอัตราค่าขนส่ง</td></tr>`
-      info.textContent = ""
-      return
-    }
-    tbody.innerHTML = SHIPPING_RATES.map(r => {
-      const active = current && num(r.weight) === num(current.weight) ? "active-rate" : ""
-      return `<tr class="${active}"><td>${fmt(r.weight)} กก.</td><td>${fmt(r.rate)} บาท</td></tr>`
-    }).join("")
-    if (current) {
-      info.textContent = `ขณะนี้ระบบใช้อัตราค่าขนส่ง: น้ำหนักไม่เกิน ${fmt(current.weight)} กก. (ค่าส่ง ${fmt(current.rate)} บาท)`
-    }
-  }
+    const tbody = document.querySelector("#shippingRateTable tbody");
+    const info = document.getElementById("activeRateInfo");
+    const current = calcCurrentRate(totalWeight);
 
-  function calcShipping(totalWeight) {
-    if (!Array.isArray(SHIPPING_RATES) || SHIPPING_RATES.length === 0)
-      return num(document.getElementById("sumShipping")?.textContent || 0)
-    for (const r of SHIPPING_RATES) { if (totalWeight <= num(r.weight)) return num(r.rate) }
-    return num(SHIPPING_RATES[SHIPPING_RATES.length - 1].rate)
+    if (!SHIPPING_RATES.length) {
+      tbody.innerHTML = `<tr><td colspan="2">ไม่มีข้อมูล</td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = SHIPPING_RATES.map(r => {
+      const active = current && num(r.weight) === num(current.weight)
+        ? "active-rate" : "";
+      return `
+      <tr class="${active}">
+        <td>${fmt(r.weight)}</td>
+        <td>${fmt(r.rate)}</td>
+      </tr>`;
+    }).join("");
+
+    if (current) {
+      info.innerText = `เรทที่ใช้งานตอนนี้: น้ำหนักไม่เกิน ${fmt(current.weight)} กก. ค่าจัดส่ง ${fmt(current.rate)} บาท`;
+    }
   }
 
   function recalculateCart() {
-    let sumSubtotal = 0, sumWeight = 0
-    document.querySelectorAll("tr.cart-row").forEach(row => {
-      const price = num(row.dataset.price)
-      const wPer = num(row.dataset.weightPerUnit)
-      const qtyEl = row.querySelector(".qty-input")
-      const subEl = row.querySelector(".cell-subtotal")
-      const qty = Math.max(0, num(qtyEl?.value))
-      const sub = price * qty
-      const w = wPer * qty
-      if (subEl) subEl.textContent = fmt(sub)
-      sumSubtotal += sub
-      sumWeight += w
-    })
-    const shipping = calcShipping(sumWeight)
-    const grand = sumSubtotal + shipping
-    document.getElementById("sumSubtotal").textContent = fmt(sumSubtotal)
-    document.getElementById("sumShipping").textContent = fmt(shipping)
-    document.getElementById("sumWeight").textContent = fmt(sumWeight)
-    document.getElementById("sumGrand").textContent = fmt(grand)
-    renderShippingRateTable(sumWeight) // ✅ อัปเดตตารางและข้อความเรตที่ใช้อยู่
+    let totalWeight = 0;
+
+    document.querySelectorAll(".cart-row").forEach(row => {
+      const qty = num(row.querySelector(".qty-input").value);
+      const price = num(row.dataset.price);
+      const weight = num(row.dataset.weightPerUnit);
+
+      row.querySelector(".cell-subtotal").textContent = fmt(qty * price);
+      totalWeight += qty * weight;
+    });
+
+    renderShippingRateTable(totalWeight);
   }
 
-  // --- เหมือนเดิม (event, autosave, remove) ---
-  const debounce = (fn, ms = 300) => { let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), ms) } }
-  const getCSRF = () => { const tpl = "{{ csrf_token }}"; if (tpl && !tpl.includes("csrf_token")) return tpl; const m = document.cookie.match(/csrftoken=([^;]+)/); return m ? m[1] : "" }
-  const pushQtyToServer = debounce((row, qty) => { const url = row.dataset.updateUrl; if (!url) return; fetch(url, { method: "POST", headers: { "Content-Type": "application/json", "X-CSRFToken": getCSRF(), "X-Requested-With": "XMLHttpRequest" }, body: JSON.stringify({ qty: Math.max(0, num(qty)) }) }).catch(() => { }) }, 400)
-  const removeRowOnServer = row => { const url = row.dataset.removeUrl; if (!url) return; fetch(url, { method: "POST", headers: { "X-CSRFToken": getCSRF(), "X-Requested-With": "XMLHttpRequest" } }).then(r => r.ok ? r.json() : null).then(data => { if (data && data.success) { row.remove(); recalculateCart() } else { location.reload() } }).catch(() => location.reload()) }
+  function getCSRF() {
+    const tpl = "{{ csrf_token }}";
+    if (tpl && !tpl.includes("csrf_token")) return tpl;
+    const m = document.cookie.match(/csrftoken=([^;]+)/);
+    return m ? m[1] : "";
+  }
 
-  const table = document.getElementById("cartTable")
+  const debounce = (fn, ms = 400) => {
+    let t;
+    return (...args) => {
+      clearTimeout(t);
+      t = setTimeout(() => fn(...args), ms);
+    };
+  };
+
+  const pushQtyToServer = debounce((row, qty) => {
+    fetch(row.dataset.updateUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-CSRFToken": getCSRF(),
+        "X-Requested-With": "XMLHttpRequest"
+      },
+      body: JSON.stringify({ qty: qty })
+    }).catch(() => { });
+  });
+
+  function removeRowOnServer(row) {
+    fetch(row.dataset.removeUrl, {
+      method: "POST",
+      headers: {
+        "X-CSRFToken": getCSRF(),
+        "X-Requested-With": "XMLHttpRequest"
+      }
+    })
+      .then(r => r.ok ? r.json() : null)
+      .then(data => {
+        if (data && data.success) {
+          row.remove();
+          recalculateCart();
+        } else {
+          location.reload();
+        }
+      })
+      .catch(() => location.reload());
+  }
+
+  const table = document.getElementById("cartTable");
+
   if (table) {
     table.addEventListener("input", e => {
-      const el = e.target; if (!el.classList.contains("qty-input")) return
-      const row = el.closest("tr.cart-row"); if (!row) return
-      if (el.value === "") return; if (num(el.value) < 0) el.value = 0
-      recalculateCart(); pushQtyToServer(row, el.value)
-    })
-    table.addEventListener("change", e => {
-      const el = e.target; if (!el.classList.contains("qty-input")) return
-      const row = el.closest("tr.cart-row"); if (!row) return
-      if (el.value === "" || num(el.value) < 0) el.value = 0
-      recalculateCart(); pushQtyToServer(row, el.value)
-    })
+      if (!e.target.classList.contains("qty-input")) return;
+      const row = e.target.closest(".cart-row");
+      let qty = num(e.target.value);
+      if (qty < 0) qty = 0;
+      recalculateCart();
+      pushQtyToServer(row, qty);
+    });
+
     table.addEventListener("click", e => {
-      const btn = e.target.closest(".remove-btn"); if (!btn) return
-      const row = btn.closest("tr.cart-row"); if (!row) return
-      Swal.fire({ title: "คุณต้องการลบสินค้านี้ออกจากตะกร้า?", icon: "warning", showCancelButton: true, confirmButtonText: "ใช่, ลบเลย", cancelButtonText: "ยกเลิก" }).then(rs => { if (rs.isConfirmed) removeRowOnServer(row) })
-    })
-    table.addEventListener("wheel", e => { if (e.target.classList && e.target.classList.contains("qty-input")) e.target.blur() }, { passive: true })
+      const btn = e.target.closest(".remove-btn");
+      if (!btn) return;
+
+      const row = btn.closest(".cart-row");
+
+      Swal.fire({
+        title: "ลบสินค้านี้ออกจากตะกร้า?",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: "ลบเลย",
+        cancelButtonText: "ยกเลิก"
+      }).then(rs => {
+        if (rs.isConfirmed) {
+          removeRowOnServer(row);
+        }
+      });
+    });
   }
 
-  window.addEventListener("DOMContentLoaded", () => { recalculateCart() })
+  function bindLoginPopup(id) {
+    const btn = document.getElementById(id);
+    if (!btn) return;
+
+    btn.addEventListener("click", function (e) {
+      e.preventDefault();
+
+      Swal.fire({
+        icon: "warning",
+        title: "กรุณาเข้าสู่ระบบก่อน",
+        text: "คุณต้องเข้าสู่ระบบก่อนชำระเงิน",
+        showCancelButton: true,
+        confirmButtonText: "เข้าสู่ระบบ",
+        cancelButtonText: "ยกเลิก"
+      }).then(rs => {
+        if (rs.isConfirmed) {
+          window.location.href = "{% url 'myapp:login' %}?next={% url 'myapp:confirm_order' %}";
+        }
+      });
+    });
+  }
+
+  bindLoginPopup("btnCheckout");
+  bindLoginPopup("btnCheckout2");
+
+  window.addEventListener("DOMContentLoaded", () => {
+    recalculateCart();
+  });
 </script>
 {% endblock %}

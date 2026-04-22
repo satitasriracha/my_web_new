@@ -1,0 +1,216 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}สรุปคำสั่งซื้อ{% endblock %}
+
+{% block content %}
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+
+<style>
+body{
+    background: linear-gradient(135deg,#f5fff7,#eefcf2);
+}
+
+/* Title */
+.page-title{
+    font-size: 2rem;
+    font-weight: 800;
+    color: #198754;
+}
+
+/* Card */
+.order-card{
+    border: none;
+    border-radius: 24px;
+    box-shadow: 0 10px 35px rgba(0,0,0,.08);
+    overflow: hidden;
+    background: #fff;
+}
+
+/* Product */
+.product-item{
+    transition: .25s ease;
+    border-radius: 18px;
+}
+.product-item:hover{
+    background: #f8fff9;
+    transform: translateY(-2px);
+}
+.product-img{
+    width: 85px;
+    height: 85px;
+    object-fit: cover;
+    border-radius: 16px;
+    border: 1px solid #eee;
+}
+
+/* Summary */
+.summary-box{
+    background: linear-gradient(180deg,#ffffff,#f8fff9);
+}
+
+.total-price{
+    font-size: 1.45rem;
+    font-weight: 800;
+    color: #198754;
+}
+
+/* Address */
+.info-box{
+    background: #f9fffb;
+    border: 1px solid #e7f7ec;
+    border-radius: 18px;
+    padding: 14px;
+}
+
+/* Buttons */
+.btn-checkout{
+    background: linear-gradient(135deg,#1db954,#128c3f);
+    border: none;
+    font-weight: 700;
+    border-radius: 50px;
+    padding: 12px;
+    transition: .25s;
+}
+.btn-checkout:hover{
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(25,135,84,.25);
+}
+
+.btn-back{
+    border-radius: 50px;
+    padding: 11px;
+    font-weight: 600;
+}
+
+/* Badge */
+.badge-soft{
+    background: #e8fff0;
+    color: #198754;
+    padding: 6px 12px;
+    border-radius: 50px;
+    font-size: .85rem;
+    font-weight: 700;
+}
+</style>
+
+<div class="container py-5">
+
+    <!-- Title -->
+    <div class="text-center mb-5">
+        <div class="badge-soft mb-2">ORDER SUMMARY</div>
+        <h2 class="page-title">🛒 สรุปคำสั่งซื้อ</h2>
+        <p class="text-muted mb-0">ตรวจสอบรายการสินค้าและข้อมูลจัดส่งก่อนชำระเงิน</p>
+    </div>
+
+    <div class="row g-4">
+
+        <!-- LEFT -->
+        <div class="col-lg-8">
+
+            <!-- Product List -->
+            <div class="order-card p-4 mb-4">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h5 class="fw-bold mb-0">รายการสินค้า</h5>
+                    <span class="badge bg-success-subtle text-success rounded-pill px-3 py-2">
+                        {{ total_items }} ชิ้น
+                    </span>
+                </div>
+
+                {% for item in items %}
+                <div class="product-item d-flex align-items-center p-3 mb-2">
+
+                    <img src="{{ item.product.image.url }}" class="product-img me-3">
+
+                    <div class="flex-grow-1">
+                        <h6 class="fw-bold mb-1">{{ item.product.product_name }}</h6>
+                        <small class="text-muted">
+                            ฿{{ item.product.price }} × {{ item.qty }}
+                        </small>
+                    </div>
+
+                    <div class="text-end">
+                        <div class="fw-bold text-success fs-5">
+                            ฿{{ item.subtotal }}
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="text-center text-muted py-5">
+                    ไม่มีสินค้าในตะกร้า
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Address -->
+            <div class="order-card p-4">
+                <h5 class="fw-bold mb-4">📍 ข้อมูลจัดส่ง</h5>
+
+                <div class="info-box mb-3">
+                    <small class="text-muted d-block">ชื่อผู้รับ</small>
+                    <strong>{{ name }}</strong>
+                </div>
+
+                <div class="info-box mb-3">
+                    <small class="text-muted d-block">เบอร์โทรศัพท์</small>
+                    <strong>{{ phone }}</strong>
+                </div>
+
+                <div class="info-box">
+                    <small class="text-muted d-block">ที่อยู่จัดส่ง</small>
+                    <strong>{{ address }}</strong>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- RIGHT -->
+        <div class="col-lg-4">
+
+            <div class="order-card summary-box p-4 sticky-top" style="top:100px;">
+
+                <h5 class="fw-bold mb-4">💳 ยอดชำระเงิน</h5>
+
+                <div class="d-flex justify-content-between mb-3">
+                    <span class="text-muted">ราคาสินค้า</span>
+                    <span class="fw-semibold">฿{{ total }}</span>
+                </div>
+
+                <div class="d-flex justify-content-between mb-3">
+                    <span class="text-muted">ค่าจัดส่ง</span>
+                    <span class="fw-semibold">฿{{ shipping_fee }}</span>
+                </div>
+
+                <div class="d-flex justify-content-between mb-3">
+                    <span class="text-muted">จำนวนสินค้า</span>
+                    <span class="fw-semibold">{{ total_items }} ชิ้น</span>
+                </div>
+
+                <hr>
+
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <span class="fw-bold fs-5">รวมทั้งหมด</span>
+                    <span class="total-price">฿{{ grand_total }}</span>
+                </div>
+
+                <a href="{% url 'myapp:checkout' %}" class="btn btn-checkout w-100 text-white">
+                    <i class="bi bi-credit-card me-2"></i> ชำระเงิน
+                </a>
+
+                <a href="{% url 'myapp:cart' %}" class="btn btn-outline-secondary btn-back w-100 mt-2">
+                    <i class="bi bi-arrow-left me-2"></i> กลับตะกร้า
+                </a>
+
+                <div class="text-center mt-3 text-muted small">
+                    🔒 ระบบชำระเงินปลอดภัย 100%
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+{% endblock %}

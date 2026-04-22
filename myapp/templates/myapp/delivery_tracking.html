@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<style>
+.box { background:#fff; margin:40px; padding:20px; border-radius:12px; }
+table { width:100%; border-collapse:collapse; }
+th, td { padding:12px; text-align:center; }
+th { background:#d8f3dc; }
+.done { background:#52b788; color:white; border:none; padding:6px 10px; border-radius:6px; }
+</style>
+
+<div class="box">
+<h2>📦 รอจัดส่งสินค้า</h2>
+
+<table>
+<tr>
+    <th>รหัสขาย</th>
+    <th>ลูกค้า</th>
+    <th>วันที่</th>
+    <th>จัดส่ง</th>
+</tr>
+
+{% for s in sales %}
+<tr id="r{{s.id}}">
+    <td>{{ s.sale_code }}</td>
+    <td>{{ s.customer.name }}</td>
+    <td>{{ s.sale_date|date:"d/m/Y" }}</td>
+    <td>
+        <button class="done" onclick="done({{s.id}})">
+            🚚 จัดส่งแล้ว
+        </button>
+    </td>
+</tr>
+{% empty %}
+<tr><td colspan="4">ไม่มีรายการ</td></tr>
+{% endfor %}
+</table>
+</div>
+
+<script>
+function done(id){
+    if(!confirm("จัดส่งแล้วใช่ไหม?")) return;
+
+    fetch('/delivery/done/' + id + '/', {
+        method:'POST',
+        headers:{'X-CSRFToken': getC('csrftoken')}
+    })
+    .then(r=>r.json())
+    .then(d=>{
+        if(d.ok){
+            document.getElementById('r'+id).remove();
+        }
+    })
+}
+
+function getC(n){
+    let v=null;
+    document.cookie.split(';').forEach(c=>{
+        c=c.trim();
+        if(c.startsWith(n+'=')){
+            v=decodeURIComponent(c.substring(n.length+1));
+        }
+    });
+    return v;
+}
+</script>
+
+{% endblock %}
