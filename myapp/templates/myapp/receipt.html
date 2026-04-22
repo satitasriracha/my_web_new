@@ -1,0 +1,18 @@
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+{% if messages %}
+<script>
+  {% for message in messages %}
+    Swal.fire({
+      icon: "success",
+      title: "{{ message }}",
+      timer: 2000,
+      showConfirmButton: false
+    })
+  {% endfor %}
+</script>
+{% endif %}
+
+<h2>ใบเสร็จ</h2>
+<p>เลขที่: {{ sale.sale_code }}</p>
+<p>ลูกค้า: {{ sale.customer.name }}</p>

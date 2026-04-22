@@ -937,13 +937,12 @@ def sale_page(request):
 
 
 def add_sale(request):
-
     if request.method == "POST":
 
         sale_code = request.POST.get("sale_code")
-        sale_date = request.POST.get("sale_date")
+        sale_date = parse_date(request.POST.get("sale_date"))
         customer_id = request.POST.get("customer_id")
-        shipping_cost = request.POST.get("shipping_cost")
+        shipping_cost = float(request.POST.get("shipping_cost", 0))
 
         customer = get_object_or_404(Customer, customer_id=customer_id)
 
@@ -955,10 +954,15 @@ def add_sale(request):
             created_by=request.user
         )
 
-        items = json.loads(request.POST.get("items_json"))
+        items_json = request.POST.get("items_json")
+        print("📌 items_json:", items_json)
+        if not items_json:
+            messages.error(request, "ไม่มีสินค้า")
+            return redirect("sale_page")
 
+        items = json.loads(items_json)
+        print("📌 items parsed:", items)
         for item in items:
-
             product = get_object_or_404(Product, product_id=item["product_id"])
 
             SaleItem.objects.create(
@@ -968,10 +972,10 @@ def add_sale(request):
                 quantity=item["qty"]
             )
 
+        messages.success(request, "บันทึกสำเร็จ")
         return redirect("sale_receipt", sale_id=sale.id)
 
     return redirect("sale_page")
-
 
 def sale_receipt(request, sale_id):
 
@@ -1127,15 +1131,20 @@ def dashboard(request):
     }
     return render(request,'myapp/dashboard.html',context)
 
+
 @transaction.atomic
 def add_sale(request):
     if request.method == "POST":
         print("📌 RAW POST:", request.POST.dict())
 
-        customer_code = request.POST.get("customer_id")  # เช่น "000"
+        customer_code = request.POST.get("customer_id")
         sale_date = parse_date(request.POST.get("sale_date"))
         note = request.POST.get("note", "")
         items_json = request.POST.get("items_json", "[]")
+
+        # ✅ กัน sale_date เป็น None (สำคัญมาก)
+        if not sale_date:
+            sale_date = timezone.now().date()
 
         # ✅ parse cart
         try:
@@ -1143,18 +1152,23 @@ def add_sale(request):
         except json.JSONDecodeError:
             items = []
 
-        # ✅ หาลูกค้าจาก customer_id (CharField ไม่ใช่ pk)
+        if not items:
+            messages.error(request, "ไม่มีสินค้าในรายการขาย")
+            return redirect("myapp:sale_list")
+
+        # ✅ หาลูกค้า
         customer = Customer.visible.filter(customer_id=customer_code).first()
         if not customer:
             messages.error(request, f"ไม่พบลูกค้า {customer_code}")
             return redirect("myapp:sale_list")
 
-        # -------- generate sale_code ใหม่ --------
+        # -------- generate sale_code --------
         today_str = timezone.now().strftime("%Y%m")
         prefix = f"SA-{today_str}"
-        last_sale = (
-            Sale.objects.filter(sale_code__startswith=prefix).order_by("-id").first()
-        )
+        last_sale = Sale.objects.filter(
+            sale_code__startswith=prefix
+        ).order_by("-id").first()
+
         if last_sale and last_sale.sale_code:
             try:
                 last_number = int(last_sale.sale_code.split("-")[-1])
@@ -1163,24 +1177,27 @@ def add_sale(request):
             next_number = last_number + 1
         else:
             next_number = 1
+
         sale_code = f"{prefix}-{next_number:03d}"
 
-        # ✅ บันทึกการขาย (ใช้ object customer ตรง ๆ)
+        # ✅ สร้าง Sale
         sale = Sale.objects.create(
             sale_code=sale_code,
             customer=customer,
             sale_date=sale_date,
             note=note,
-            status=4,  # ขายหน้าร้าน = เสร็จสิ้นทันที
+            status=4,
         )
 
-        # ✅ เพิ่มสินค้าใน SaleItem
+        # ✅ เพิ่มสินค้า + (ตัวเลือก: ตัด stock)
         for it in items:
             pid = it.get("product_id") or it.get("productId")
-            price = it.get("price")
-            qty = it.get("qty")
+            price = it.get("price") or it.get("price_per_unit") or 0
+            qty = it.get("qty") or it.get("quantity") or 1
+
             if not pid:
                 continue
+
             product = Product.objects.filter(product_id=pid).first()
             if not product:
                 continue
@@ -1192,12 +1209,18 @@ def add_sale(request):
                 quantity=qty,
             )
 
-        # ✅ คำนวณค่าขนส่งแล้ว save อีกรอบ
+            # 🔥 (แนะนำ) ตัด stock
+            # product.stock -= int(qty)
+            # product.save()
+
+        # ✅ คำนวณค่าขนส่ง
         sale.shipping_fee = sale.calculate_shipping()
         sale.save()
 
         messages.success(request, f"บันทึกการขาย {sale.sale_code} เรียบร้อย")
-        return redirect("myapp:sale_list")
+
+        # ❗ แก้ redirect ให้ตรง urls.py
+        return redirect("myapp:sale_receipt", sale_id=sale.id)
 
     return redirect("myapp:sale_list")
 
@@ -1797,7 +1820,13 @@ def sale_preview(request):
     if request.method == "POST":
         import json
 
-        cart = json.loads(request.POST.get("items_json"))
+        # ✅ ต้องมีบรรทัดนี้ก่อน
+        raw_json = request.POST.get("items_json", "[]")
+
+        try:
+            cart = json.loads(raw_json)
+        except:
+            cart = []
 
         items = []
         subtotal = 0
@@ -1820,6 +1849,9 @@ def sale_preview(request):
             "subtotal": subtotal,
             "shipping": shipping,
             "grand_total": grand_total,
+
+            # ✅ ตอนนี้ใช้ได้แล้ว
+            "cart_json": raw_json,
         })
 def pay_api(request, id):
             sale = get_object_or_404(Sale, id=id)
@@ -1953,3 +1985,6 @@ def confirm_order_view(request):
         "phone": phone,
         "address": address,
     })
+def receipt(request, pk):
+    sale = Sale.objects.get(pk=pk)
+    return render(request, "myapp/receipt.html", {"sale": sale})   
